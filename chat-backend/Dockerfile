@@ -13,7 +13,7 @@ RUN curl -fsSL https://unpkg.com/prismjs@1.29.0/themes/prism-tomorrow.min.css \
 	-o /workspace/src/main/resources/static/prism-tomorrow.min.css
 RUN mvn -q -e -DskipTests package
 
-FROM sapmachine:25-jfre-alpine
+FROM sapmachine:25-jre-alpine
 WORKDIR /app
 COPY --from=builder /workspace/target/phone-chat-1.0.0.jar /app/chat.jar
 EXPOSE 8080

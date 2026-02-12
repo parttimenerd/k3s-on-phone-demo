@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat
+  labels:
+    app: chat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chat
+  template:
+    metadata:
+      labels:
+        app: chat
+    spec:
+      containers:
+        - name: rqlite
+          image: rqlite/rqlite:8.27.0
+          args:
+            - -http-addr
+            - 0.0.0.0:4001
+            - -raft-addr
+            - 0.0.0.0:4002
+            - /rqlite/file/data
+          volumeMounts:
+            - name: chat-data
+              mountPath: /rqlite
+        - name: chat
+          image: docker.io/parttimenerd/phone-chat:v1.0.0
+          ports:
+            - containerPort: 8080
+              name: http
+              hostPort: 80
+            - containerPort: 8005
+              name: ai
+              hostPort: 8005
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: RQLITE_JDBC_URL
+              value: jdbc:rqlite:http://localhost:4001
+            - name: COMMANDS_FILE
+              value: /config/commands.conf
+            - name: AI_SERVICE_URL
+              value: http://localhost:8005
+          volumeMounts:
+            - name: chat-data
+              mountPath: /rqlite
+            - name: chat-config
+              mountPath: /config
+          readinessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: chat-data
+          emptyDir: {}
+        - name: chat-config
+          configMap:
+            name: chat-commands
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chat
+  labels:
+    app: chat
+spec:
+  selector:
+    app: chat
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
