@@ -13,4 +13,5 @@ sudo kubectl wait --for=condition=ready pod -l app=echo --timeout=60s
 
 echo ""
 echo "Pods are running:"
+echo "kubectl get pods -o wide"
 sudo kubectl get pods -o wide
