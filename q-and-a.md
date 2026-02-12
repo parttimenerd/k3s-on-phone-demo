@@ -1,6 +1,6 @@
 ---
 theme: default
-background: img/cover.jpg
+background: slides/img/cover.jpg
 class: text-center
 highlighter: shiki
 lineNumbers: false
