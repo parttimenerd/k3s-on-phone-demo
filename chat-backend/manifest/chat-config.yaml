@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chat-commands
+data:
+  commands.conf: |
+    # command=shell command
+    # ${ARG} is replaced by the argument string
+    # ${POD_NAME} and ${NODE_NAME} are injected from env
+    whoami=echo "pod=${POD_NAME} node=${NODE_NAME}"
+    date=date
+    llm=curl -s http://llm:8005/ai/text -H 'Content-Type: application/json' -d '{"prompt":"${ARG}","model":"gemma-3n-e2b-it","maxTokens":150,"temperature":0.7,"topK":40,"topP":0.95}'
+    ai_status=curl -s http://llm:8005/status
+    ai_help=curl -s http://llm:8005/help
+    ai_models=curl -s http://llm:8005/ai/models
+    ai_download=curl -s http://llm:8005/ai/models/download -H 'Content-Type: application/json' -d '{"modelName":"${ARG}"}'
+    ai_test=curl -s http://llm:8005/ai/models/test -H 'Content-Type: application/json' -d '{"modelName":"${ARG}","prompt":"hello"}'
+    ai_detect=curl -s http://llm:8005/ai/object_detection -H 'Content-Type: application/json' -d '{"side":"rear","threshold":0.6,"maxResults":5,"returnImage":false}'
+    ai_orientation=curl -s http://llm:8005/orientation
+    ai_capture=curl -s 'http://llm:8005/capture?side=rear&zoom=1.0'

@@ -1,0 +1,33 @@
+
+            _ _ _
+           | (_) |
+  _ __ __ _| |_| |_ ___
+ | '__/ _  | | | __/ _ \   The lightweight, distributed
+ | | | (_| | | | ||  __/   relational database.
+ |_|  \__, |_|_|\__\___|
+         | |               www.rqlite.io
+         |_|
+
+[rqlited] 2026/02/11 20:31:09 rqlited starting, version v9.4.0, SQLite 3.51.2, commit unknown, branch master, compiler (toolchain) gc, compiler (command) unknown
+[rqlited] 2026/02/11 20:31:09 go1.25.7, target architecture is arm64, operating system target is darwin
+[rqlited] 2026/02/11 20:31:09 launch command: rqlited -http-addr 127.0.0.1:4001 -raft-addr 127.0.0.1:4002 /Users/i560383_1/code/experiments/k3s-on-phone-demo/chat-backend/.rqlite
+[mux] 2026/02/11 20:31:09 mux serving on 127.0.0.1:4002, advertising 127.0.0.1:4002
+[rqlited] 2026/02/11 20:31:09 preexisting node state detected in /Users/i560383_1/code/experiments/k3s-on-phone-demo/chat-backend/.rqlite
+[cluster] 2026/02/11 20:31:09 service listening on 127.0.0.1:4002
+[http] 2026/02/11 20:31:09 execute queue processing started with capacity 1024, batch size 128, timeout 50ms
+[http] 2026/02/11 20:31:09 service listening on 127.0.0.1:4001
+[store] 2026/02/11 20:31:09 opening store with node ID 127.0.0.1:4002, listening on 127.0.0.1:4002
+[store] 2026/02/11 20:31:09 ensuring data directory exists at /Users/i560383_1/code/experiments/k3s-on-phone-demo/chat-backend/.rqlite
+[store] 2026/02/11 20:31:09 old v7 snapshot directory does not exist at /Users/i560383_1/code/experiments/k3s-on-phone-demo/chat-backend/.rqlite/snapshots, nothing to upgrade
+[snapshot-store] 2026/02/11 20:31:09 store initialized using /Users/i560383_1/code/experiments/k3s-on-phone-demo/chat-backend/.rqlite/rsnapshots
+[snapshot-store] 2026/02/11 20:31:09 checking consistency of snapshot store at /Users/i560383_1/code/experiments/k3s-on-phone-demo/chat-backend/.rqlite/rsnapshots
+[snapshot-store] 2026/02/11 20:31:09 check complete
+[store] 2026/02/11 20:31:09 1 preexisting snapshots present
+[store] 2026/02/11 20:31:09 detected successful prior snapshot operation, skipping restore
+[store] 2026/02/11 20:31:09 clean snapshot check CRC32 matched, calculation took 64.333µs
+[store] 2026/02/11 20:31:09 raft log is 262 kB, first index is 1, last index is 65
+[rqlited] 2026/02/11 20:31:09 node HTTP API available at http://127.0.0.1:4001
+[rqlited] 2026/02/11 20:31:09 connect using the command-line tool via 'rqlite -H 127.0.0.1 -p 4001'
+[raft] 2026/02/11 20:31:11 [WARN]  heartbeat timeout reached, starting election: last-leader-addr= last-leader-id=
+[store] 2026/02/11 20:31:11 this node (ID=127.0.0.1:4002, addr=127.0.0.1:4002) is now Leader
+[store] 2026/02/11 20:31:13 first log applied since node 127.0.0.1:4002 started, log at index 67

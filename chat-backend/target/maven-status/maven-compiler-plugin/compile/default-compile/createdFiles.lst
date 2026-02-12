@@ -1,0 +1,8 @@
+demo/chat/ChatServer$AppConfig.class
+demo/chat/ChatServer$ApiError.class
+demo/chat/ChatServer$IncomingMessage.class
+demo/chat/ChatServer.class
+demo/chat/ChatServer$ThrowingFunction.class
+demo/chat/ChatServer$ThrowingConsumer.class
+demo/chat/ChatServer$CommandResult.class
+demo/chat/ChatServer$Message.class
