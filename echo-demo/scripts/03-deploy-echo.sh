@@ -9,8 +9,8 @@ sudo kubectl apply -f manifests/echo.yaml
 
 echo ""
 echo "Waiting for pods to be ready..."
-kubectl wait --for=condition=ready pod -l app=echo --timeout=60s
+sudo kubectl wait --for=condition=ready pod -l app=echo --timeout=60s
 
 echo ""
 echo "Pods are running:"
-kubectl get pods -o wide
+sudo kubectl get pods -o wide
