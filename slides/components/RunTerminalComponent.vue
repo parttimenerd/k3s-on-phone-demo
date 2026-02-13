@@ -1,28 +1,30 @@
 <template>
-  <Transition name="modal">
-    <div v-if="isOpen" class="modal-overlay" @click.self="close">
-      <div class="modal-container">
-        <div class="modal-header">
-          <h3>Terminal</h3>
-          <div class="modal-actions">
-            <span v-if="!isConnected" class="status-badge error">Disconnected</span>
-            <span v-else class="status-badge success">Connected</span>
-            <button @click="close" class="close-btn" title="Close (Esc)">×</button>
+  <Teleport to="body">
+    <Transition name="modal">
+      <div v-show="isOpen" class="modal-overlay" @click.self="close" :style="overlayStyle">
+        <div class="modal-container">
+          <div class="modal-header">
+            <h3>Terminal</h3>
+            <div class="modal-actions">
+              <span v-if="!isConnected" class="status-badge error">Disconnected</span>
+
+              <button @click="close" class="close-btn" title="Close (Ctrl+Esc)">×</button>
+            </div>
+          </div>
+          <div class="modal-body">
+            <div ref="terminalRef" class="terminal-container"></div>
+          </div>
+          <div class="modal-footer">
+            <kbd>Ctrl+C</kbd> to interrupt · <kbd>Ctrl+Shift+C</kbd> to copy · <kbd>Ctrl+Esc</kbd> to close · <kbd>Ctrl+L</kbd> to clear · <kbd>Ctrl+F</kbd> to search · <kbd>Ctrl+±</kbd> to zoom
           </div>
         </div>
-        <div class="modal-body">
-          <div ref="terminalRef" class="terminal-container"></div>
-        </div>
-        <div class="modal-footer">
-          <kbd>Ctrl+C</kbd> to interrupt · <kbd>Esc</kbd> to close · <kbd>Ctrl+L</kbd> to clear
-        </div>
       </div>
-    </div>
-  </Transition>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import { WebLinksAddon } from '@xterm/addon-web-links'
@@ -34,6 +36,7 @@ const emit = defineEmits(['close'])
 const isOpen = ref(false)
 const isConnected = ref(false)
 const terminalRef = ref(null)
+const overlayStyle = ref({})
 
 let terminal = null
 let fitAddon = null
@@ -41,13 +44,18 @@ let webLinksAddon = null
 let searchAddon = null
 let ws = null
 let pendingScript = null
+let lastSearchTerm = ''
+let fontSize = 20
+const MIN_FONT_SIZE = 10
+const MAX_FONT_SIZE = 40
+const FONT_SIZE_STORAGE_KEY = 'slidev-terminal-font-size'
 
 const WS_URL = 'ws://127.0.0.1:3031'
 
 function createTerminal() {
   terminal = new Terminal({
     cursorBlink: true,
-    fontSize: 14,
+    fontSize,
     fontFamily: 'Menlo, Monaco, "Courier New", monospace',
     theme: {
       background: '#1e1e1e',
@@ -82,6 +90,69 @@ function createTerminal() {
   terminal.loadAddon(webLinksAddon)
   terminal.loadAddon(searchAddon)
 
+  terminal.attachCustomKeyEventHandler((event) => {
+    if (!isOpen.value) return true
+
+    if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'c') {
+      event.preventDefault()
+      copySelectionToClipboard()
+      return false
+    }
+
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Escape') {
+      event.preventDefault()
+      close()
+      return false
+    }
+
+    if ((event.ctrlKey || event.metaKey) && isZoomInKey(event)) {
+      event.preventDefault()
+      adjustFontSize(1)
+      return false
+    }
+
+    if ((event.ctrlKey || event.metaKey) && isZoomOutKey(event)) {
+      event.preventDefault()
+      adjustFontSize(-1)
+      return false
+    }
+
+    if ((event.ctrlKey || event.metaKey) && isZoomResetKey(event)) {
+      event.preventDefault()
+      resetFontSize()
+      return false
+    }
+
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'l') {
+      event.preventDefault()
+      terminal.clear()
+      terminal.write('\x1b[H')
+      return false
+    }
+
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'f') {
+      event.preventDefault()
+      const term = window.prompt('Search terminal output', lastSearchTerm || '')
+      if (!term) return false
+      lastSearchTerm = term
+      searchAddon?.findNext(term)
+      return false
+    }
+
+    if (event.key === 'F3') {
+      event.preventDefault()
+      if (!lastSearchTerm) return false
+      if (event.shiftKey) {
+        searchAddon?.findPrevious(lastSearchTerm)
+      } else {
+        searchAddon?.findNext(lastSearchTerm)
+      }
+      return false
+    }
+
+    return true
+  })
+
   terminal.open(terminalRef.value)
   fitAddon.fit()
 
@@ -92,6 +163,7 @@ function createTerminal() {
 }
 
 function handleResize() {
+  updateOverlayBounds()
   if (fitAddon && isOpen.value) {
     fitAddon.fit()
     if (ws && ws.readyState === WebSocket.OPEN) {
@@ -101,6 +173,109 @@ function handleResize() {
         rows: terminal.rows
       }))
     }
+  }
+}
+
+function applyFontSize() {
+  if (!terminal) return
+  terminal.options.fontSize = fontSize
+  terminal.refresh(0, terminal.rows - 1)
+  if (fitAddon && isOpen.value) {
+    requestAnimationFrame(() => {
+      fitAddon.fit()
+    })
+  }
+
+  if (typeof window !== 'undefined') {
+    try {
+      window.localStorage.setItem(FONT_SIZE_STORAGE_KEY, String(fontSize))
+    } catch (error) {
+      console.warn('[terminal] failed to persist font size', error)
+    }
+  }
+}
+
+async function copySelectionToClipboard() {
+  if (!terminal) return
+  const selection = terminal.getSelection()
+  if (!selection) return
+
+  try {
+    if (navigator?.clipboard?.writeText) {
+      await navigator.clipboard.writeText(selection)
+    } else {
+      const textarea = document.createElement('textarea')
+      textarea.value = selection
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+    }
+  } catch (error) {
+    console.warn('[terminal] copy failed', error)
+  }
+}
+
+function adjustFontSize(delta) {
+  const nextSize = Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, fontSize + delta))
+  if (nextSize === fontSize) return
+  fontSize = nextSize
+  applyFontSize()
+}
+
+function resetFontSize() {
+  fontSize = 16
+  applyFontSize()
+}
+
+function isZoomInKey(event) {
+  return event.key === '+' || event.key === '=' || event.code === 'NumpadAdd'
+}
+
+function isZoomOutKey(event) {
+  return event.key === '-' || event.key === '_' || event.code === 'NumpadSubtract'
+}
+
+function isZoomResetKey(event) {
+  return event.key === '0' || event.code === 'Digit0' || event.code === 'Numpad0'
+}
+
+function updateOverlayBounds() {
+  if (typeof window === 'undefined') return
+
+  const selectors = [
+    '.slidev-layout',
+    '.slidev-page',
+    '.slidev-container',
+    '#slide-container',
+    '#app'
+  ]
+
+  let target = null
+  for (const selector of selectors) {
+    const candidate = document.querySelector(selector)
+    if (candidate) {
+      target = candidate
+      break
+    }
+  }
+
+  if (!target) {
+    overlayStyle.value = {}
+    return
+  }
+
+  const rect = target.getBoundingClientRect()
+  if (!rect?.width || !rect?.height) {
+    overlayStyle.value = {}
+    return
+  }
+
+  overlayStyle.value = {
+    '--terminal-slide-width': `${rect.width}px`,
+    '--terminal-slide-height': `${rect.height}px`
   }
 }
 
@@ -175,7 +350,11 @@ function executeScript(scriptPath) {
 
 function open(scriptPath = null) {
   console.info('[terminal] open requested', { scriptPath })
+  updateOverlayBounds()
   isOpen.value = true
+  if (typeof window !== 'undefined') {
+    window.__terminalIsOpen = true
+  }
   if (scriptPath) {
     pendingScript = scriptPath
   }
@@ -185,8 +364,10 @@ function open(scriptPath = null) {
       createTerminal()
       console.info('[terminal] connecting websocket')
       connectWebSocket()
+      terminal?.focus()
     } else {
       fitAddon.fit()
+      terminal?.focus()
       // If already connected and have a script, execute it
       if (scriptPath && ws && ws.readyState === WebSocket.OPEN) {
         console.info('[terminal] executing script immediately', { scriptPath })
@@ -200,6 +381,9 @@ function open(scriptPath = null) {
 
 function close() {
   isOpen.value = false
+  if (typeof window !== 'undefined') {
+    window.__terminalIsOpen = false
+  }
   emit('close')
 }
 
@@ -215,6 +399,42 @@ function handleKeydown(event) {
       close()
     } else {
       open()
+    }
+  } else if (isOpen.value && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'l') {
+    event.preventDefault()
+    if (terminal) {
+      terminal.clear()
+      terminal.write('\x1b[H')
+    }
+  } else if (isOpen.value && event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'c') {
+    event.preventDefault()
+    copySelectionToClipboard()
+  } else if (isOpen.value && (event.ctrlKey || event.metaKey) && isZoomInKey(event)) {
+    event.preventDefault()
+    adjustFontSize(1)
+  } else if (isOpen.value && (event.ctrlKey || event.metaKey) && isZoomOutKey(event)) {
+    event.preventDefault()
+    adjustFontSize(-1)
+  } else if (isOpen.value && (event.ctrlKey || event.metaKey) && isZoomResetKey(event)) {
+    event.preventDefault()
+    resetFontSize()
+  } else if (isOpen.value && (event.ctrlKey || event.metaKey) && event.key === 'Escape') {
+    event.preventDefault()
+    close()
+  } else if (isOpen.value && (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'f') {
+    event.preventDefault()
+    if (!searchAddon) return
+    const term = window.prompt('Search terminal output', lastSearchTerm || '')
+    if (!term) return
+    lastSearchTerm = term
+    searchAddon.findNext(term)
+  } else if (isOpen.value && event.key === 'F3') {
+    event.preventDefault()
+    if (!searchAddon || !lastSearchTerm) return
+    if (event.shiftKey) {
+      searchAddon.findPrevious(lastSearchTerm)
+    } else {
+      searchAddon.findNext(lastSearchTerm)
     }
   } else if (event.key === 'Escape' && isOpen.value) {
     event.preventDefault()
@@ -233,6 +453,19 @@ function handleRunEvent(event) {
 }
 
 onMounted(() => {
+  if (typeof window !== 'undefined') {
+    const storedFontSize = window.localStorage.getItem(FONT_SIZE_STORAGE_KEY)
+    if (storedFontSize) {
+      const parsed = Number.parseInt(storedFontSize, 10)
+      if (!Number.isNaN(parsed)) {
+        fontSize = Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, parsed))
+      }
+    }
+  }
+  nextTick(() => {
+    updateOverlayBounds()
+  })
+  window.__terminalIsOpen = false
   window.addEventListener('keydown', handleKeydown)
   window.addEventListener('terminal:run', handleRunEvent)
   window.openTerminal = (scriptPath = null) => {
@@ -279,17 +512,18 @@ defineExpose({
   justify-content: center;
   z-index: 9999;
   padding: 20px;
+  user-select: text;
 }
 
 .modal-container {
   background: #1e1e1e;
   border-radius: 8px;
-  width: 90vw;
-  max-width: 1200px;
-  height: 80vh;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  user-select: text;
 }
 
 .modal-header {
@@ -363,6 +597,13 @@ defineExpose({
   height: 100%;
   border-radius: 4px;
   overflow: hidden;
+}
+
+.terminal-container,
+.terminal-container .xterm,
+.terminal-container .xterm-screen,
+.terminal-container .xterm-viewport {
+  user-select: text !important;
 }
 
 .modal-footer {

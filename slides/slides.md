@@ -17,24 +17,43 @@ mdc: true
 ---
 
 <script setup>
-import { provide, ref } from 'vue'
-import RunTerminalComponent from './components/RunTerminalComponent.vue'
 import qrMostly from './img/qr-mostlynerdless.png'
 import qrSap from './img/qr-sapmachine.png'
 import qrGithub from './img/qr-k3s-github.png'
-
-const terminalRef = ref(null)
-
-function openTerminal(scriptPath = null) {
-  if (terminalRef.value) {
-    terminalRef.value.open(scriptPath)
-  }
-}
-
-provide('openTerminal', openTerminal)
 </script>
 
-<RunTerminalComponent ref="terminalRef" />
+<style>
+:root {
+  --code-font-size: 1.05rem;
+  --code-line-height: 1.5;
+  --code-bg: rgba(30, 41, 59, 0.92);
+  --code-border: rgba(226, 232, 240, 0.5);
+}
+
+.slidev-slide pre,
+.slidev-slide .shiki {
+  font-size: var(--code-font-size);
+  line-height: var(--code-line-height);
+  background: var(--code-bg) !important;
+  border: 1px solid var(--code-border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.25);
+}
+
+.slidev-slide code {
+  font-size: 0.95em;
+}
+
+.slidev-slide .shiki code {
+  white-space: pre-wrap;
+}
+
+.slidev-slide pre code {
+  font-weight: 500;
+  color: #f8fafc;
+}
+</style>
 
 # Kubernetes on a Phone
 
@@ -1497,8 +1516,13 @@ One command. Clean slate. Ready for the next demo.
 layout: statement
 ---
 
-# So, yes: Phones can run Kubernetes.
-
+# So, <OrangeText>yes</OrangeText>: 
+# Phones can run 
+# <BlueText>Kubernetes</BlueText>.
+<br/>
+<v-click>
+Whether they should is another question...
+</v-click>
 ---
 
 # The Real Lesson

@@ -30,6 +30,26 @@ npm start
 
 The server will start on `http://127.0.0.1:3031`
 
+## Logging
+
+Logging is configurable via environment variables:
+
+- `TERMINAL_SERVER_LOG_LEVEL` (default: `info`)
+  - Supported: `error`, `warn`, `info`, `debug`
+- `TERMINAL_SERVER_LOG_FORMAT` (default: `text`)
+  - Supported: `text`, `json`
+- `TERMINAL_SERVER_LOG_HTTP` (default: `true`)
+  - Set to `false` to disable per-request HTTP logs
+
+Example:
+
+```bash
+TERMINAL_SERVER_LOG_LEVEL=debug \
+TERMINAL_SERVER_LOG_FORMAT=json \
+TERMINAL_SERVER_LOG_HTTP=false \
+npm start
+```
+
 ## API
 
 ### Health Check

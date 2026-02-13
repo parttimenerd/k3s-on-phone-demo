@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 let terminalAvailabilityPromise: Promise<boolean> | null = null
 let terminalAvailabilityResult: boolean | null = null
@@ -127,8 +127,32 @@ function handleRunClick() {
   )
 }
 
+function handleGlobalRunShortcut(event: KeyboardEvent) {
+  if (event.key !== 'r' || event.ctrlKey || event.metaKey || event.altKey) {
+    return
+  }
+  if (event.target && ['INPUT', 'TEXTAREA'].includes((event.target as HTMLElement).tagName)) {
+    return
+  }
+  if (!isTerminalAvailable.value) {
+    return
+  }
+  const isOpen = (window as Window & { __terminalIsOpen?: boolean }).__terminalIsOpen
+  if (isOpen) {
+    return
+  }
+
+  event.preventDefault()
+  handleRunClick()
+}
+
 onMounted(() => {
   checkTerminalAvailability()
+  window.addEventListener('keydown', handleGlobalRunShortcut)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalRunShortcut)
 })
 </script>
 
