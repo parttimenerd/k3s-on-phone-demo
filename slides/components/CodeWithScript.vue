@@ -4,7 +4,11 @@
       <slot></slot>
     </div>
     <div class="script-pill">
-      <span class="script-icon">▶</span>
+      <span class="script-icon" aria-hidden="true">
+        <svg viewBox="0 0 12 12" width="10" height="10" role="presentation">
+          <path d="M3 2.2v7.6L9.2 6 3 2.2z" fill="currentColor" />
+        </svg>
+      </span>
       <code>{{ scriptPath }}</code>
       <button
         v-if="showRunButton"
@@ -22,6 +26,30 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
+let terminalAvailabilityPromise: Promise<boolean> | null = null
+let terminalAvailabilityResult: boolean | null = null
+
+function getAvailabilityCache() {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  const win = window as Window & {
+    __terminalAvailabilityResult?: boolean | null
+    __terminalAvailabilityPromise?: Promise<boolean> | null
+  }
+
+  if (typeof win.__terminalAvailabilityResult !== 'undefined') {
+    terminalAvailabilityResult = win.__terminalAvailabilityResult ?? null
+  }
+
+  if (typeof win.__terminalAvailabilityPromise !== 'undefined') {
+    terminalAvailabilityPromise = win.__terminalAvailabilityPromise ?? null
+  }
+
+  return win
+}
+
 const props = defineProps<{
   scriptPath: string
 }>()
@@ -31,25 +59,53 @@ const isTerminalAvailable = ref(false)
 const showRunButton = computed(() => isTerminalAvailable.value)
 
 async function checkTerminalAvailability() {
+  const cacheWindow = getAvailabilityCache()
+
+  if (terminalAvailabilityResult !== null) {
+    isTerminalAvailable.value = terminalAvailabilityResult
+    return
+  }
+
+  if (terminalAvailabilityPromise) {
+    isTerminalAvailable.value = await terminalAvailabilityPromise
+    return
+  }
+
   if (typeof window === 'undefined') {
     isTerminalAvailable.value = false
     return
   }
 
-  const controller = new AbortController()
-  const timeout = window.setTimeout(() => controller.abort(), 500)
+  terminalAvailabilityPromise = (async () => {
+    const controller = new AbortController()
+    const timeout = window.setTimeout(() => controller.abort(), 500)
 
-  try {
-    const response = await fetch('http://127.0.0.1:3031/health', {
-      method: 'GET',
-      signal: controller.signal
-    })
-    isTerminalAvailable.value = response.ok
-  } catch (error) {
-    isTerminalAvailable.value = false
-  } finally {
-    window.clearTimeout(timeout)
+    try {
+      const response = await fetch('http://127.0.0.1:3031/health', {
+        method: 'GET',
+        signal: controller.signal
+      })
+      terminalAvailabilityResult = response.ok
+      if (cacheWindow) {
+        cacheWindow.__terminalAvailabilityResult = terminalAvailabilityResult
+      }
+      return response.ok
+    } catch (error) {
+      terminalAvailabilityResult = false
+      if (cacheWindow) {
+        cacheWindow.__terminalAvailabilityResult = terminalAvailabilityResult
+      }
+      return false
+    } finally {
+      window.clearTimeout(timeout)
+    }
+  })()
+
+  if (cacheWindow) {
+    cacheWindow.__terminalAvailabilityPromise = terminalAvailabilityPromise
   }
+
+  isTerminalAvailable.value = await terminalAvailabilityPromise
 }
 
 function handleRunClick() {
@@ -103,8 +159,13 @@ onMounted(() => {
 }
 
 .script-icon {
-  font-size: 10px;
+  display: inline-flex;
+  align-items: center;
   opacity: 0.8;
+}
+
+.script-icon svg {
+  display: block;
 }
 
 .script-pill code {

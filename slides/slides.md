@@ -19,6 +19,9 @@ mdc: true
 <script setup>
 import { provide, ref } from 'vue'
 import RunTerminalComponent from './components/RunTerminalComponent.vue'
+import qrMostly from './img/qr-mostlynerdless.png'
+import qrSap from './img/qr-sapmachine.png'
+import qrGithub from './img/qr-k3s-github.png'
 
 const terminalRef = ref(null)
 
@@ -2408,12 +2411,6 @@ For your time, your attention, and your curiosity
 <div class="text-3xl text-orange-400 font-bold mt-8">
 Now go build something impossible
 </div>
-
-<script setup>
-import qrMostly from './img/qr-mostlynerdless.png'
-import qrSap from './img/qr-sapmachine.png'
-import qrGithub from './img/qr-k3s-github.png'
-</script>
 
 <div class="grid grid-cols-3 gap-8 mt-10 text-center">
   <div>
