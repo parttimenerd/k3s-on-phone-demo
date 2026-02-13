@@ -2,345 +2,122 @@
 
 > Running a multi-node Kubernetes cluster on Android phones — with a distributed chat app and an on-device LLM.
 
-This project explores a simple but slightly absurd idea:
+Modern smartphones are more powerful than early cloud servers. This project demonstrates running **k3s** (lightweight Kubernetes) on Android phones for educational purposes.
 
-> Modern smartphones are more powerful than early cloud servers.
-> So… can we use them as Kubernetes nodes?
+## Quick Start
 
-The answer is: **yes**.
+**Slides & Presentation:** See [slides/](./slides/)
 
-This repository documents how to:
-
-* Run **k3s** on Android phones
-* Form a **multi-node Kubernetes cluster**
-* Connect nodes using **Tailscale**
-* Deploy lightweight demo applications
-* Run a distributed **chat app**
-* Integrate an **LLM running locally on a phone**
-* Demonstrate Kubernetes core concepts in a beginner-friendly way
-
-This was built for a 45-minute beginner conference talk.
-
----
-
-## 🎤 For the Talk
-
-**Full talk script with speaker notes, demos, and timing:** [TALK_DRAFT.md](./TALK_DRAFT.md)
-
-Includes:
-- Minute-by-minute breakdown
-- Slide titles and speaker notes  
-- 13 live demo commands with expected output
-- Pacing and delivery tips
-- Pre-talk checklist
-- Q&A preparation
-
----
-
-# Table of Contents
-
-* [Architecture Overview](#architecture-overview)
-* [Why This Works](#why-this-works)
-* [Hardware Setup](#hardware-setup)
-* [Software Stack](#software-stack)
-* [Installing k3s on Android](#installing-k3s-on-android)
-* [Creating a Multi-Node Cluster](#creating-a-multi-node-cluster)
-* [Networking with Tailscale](#networking-with-tailscale)
-* [Demo Applications](#demo-applications)
-
-  * [Pong Server](#pong-server)
-  * [Distributed Chat](#distributed-chat)
-  * [LLM Integration](#llm-integration)
-* [Kubernetes Concepts Used](#kubernetes-concepts-used)
-* [References](#references)
-* [Why You Probably Shouldn’t Do This in Production](#why-you-probably-shouldnt-do-this-in-production)
-
----
-
-# Architecture Overview
-
-```
-           +------------------+
-           |   Phone A        |
-           |  (Control Plane) |
-           |  k3s server      |
-           +------------------+
-                    |
-                    |  (Tailscale VPN)
-                    |
-           +------------------+
-           |   Phone B        |
-           |  k3s agent       |
-           +------------------+
+To run the slides locally:
+```bash
+cd slides
+npm install
+npm run dev
 ```
 
-Optional:
-
-```
-+------------------+
-|  MacBook         |
-|  kubectl client  |
-+------------------+
+Or use the convenient launcher:
+```bash
+cd slides
+./launch.sh              # Presentation only
+./launch.sh --terminal   # With interactive terminal server
 ```
 
-Workloads are distributed across phones.
+Then open http://localhost:3032 in your browser.
 
-The LLM runs only on a labeled node.
+### Interactive Terminal Feature
 
----
+The presentation includes an **interactive terminal** for running demo scripts directly from slides.
 
-# Why This Works
+**Features:**
+- Execute scripts in a real terminal emulator (xterm.js)
+- Press `t` to toggle terminal or click "Run" buttons
+- See live command output in the presentation
 
-Android runs on the **Linux kernel**.
+**⚠️ Security Notice:**
+- **Localhost only** - Terminal server binds to 127.0.0.1
+- **No encryption** - WebSocket traffic is unencrypted
+- **Not for production** - Educational/demo purposes only
+- Scripts are whitelisted to `echo-demo/`, `chat-demo/`, and `demo/` directories
 
-Kubernetes relies on:
+**Setup:**
+```bash
+cd slides
+./launch.sh --terminal
+```
 
-* Linux namespaces
-* cgroups
-* container runtimes (containerd)
-* networking primitives
+The launcher will automatically install dependencies and start both the terminal server and presentation.
 
-k3s is a lightweight Kubernetes distribution packaged as a single binary:
+**Demo Scripts:**
+- `echo-demo/` — Simple echo server deployment
+- `chat-demo/` — Distributed chat with LLM integration
 
-👉 [https://k3s.io/](https://k3s.io/)
+## Table of Contents
 
-As long as we have:
-
-* A Linux userspace
-* containerd
-* networking
-
-We can run Kubernetes.
-
----
-
-# Hardware Setup
-
-* Phone A (Control Plane)
-* Phone B (Worker)
-* Optional MacBook (kubectl access)
-* WiFi network
-* Phones plugged into power
-* Developer mode enabled
-* Disable battery optimization
-
-⚠ Important: Phones will throttle if overheating.
-
----
-
-# Software Stack
-
-* Android 16 terminal environment (or Termux)
-* k3s
-* containerd (bundled with k3s)
-* Tailscale
-* Lightweight container images
-* Optional: llama.cpp or MLC LLM for on-device inference
+- [Kubernetes on a Phone 📱☸️](#kubernetes-on-a-phone-️)
+  - [Quick Start](#quick-start)
+    - [Interactive Terminal Feature](#interactive-terminal-feature)
+  - [Table of Contents](#table-of-contents)
+  - [Architecture](#architecture)
+  - [Setup](#setup)
+  - [Demo: LLM Integration](#demo-llm-integration)
+  - [Setup](#setup-1)
+  - [Usage](#usage)
+  - [Models Available](#models-available)
+  - [API Details](#api-details)
+- [Kubernetes Concepts Used](#kubernetes-concepts-used)
+- [Additional Useful References](#additional-useful-references)
+- [Final Thought](#final-thought)
+  - [TODO](#todo)
+    - [Interactive Terminal Feature (xterm.js)](#interactive-terminal-feature-xtermjs)
+    - [Previous TODOs](#previous-todos)
 
 ---
 
-# Installing k3s on Android
+## Architecture
 
-On Phone A (control plane):
+```
+Phone A (k3s server) ←→ Tailscale VPN ←→ Phone B (k3s agent)
+```
 
+## Setup
+
+**Requirements:**
+- Android 15+ with Linux Terminal App (or Termux)
+- Tailscale account
+- Phones plugged in and battery optimization disabled
+
+**Install k3s on Phone A:**
 ```bash
 curl -sfL https://get.k3s.io | sh -
 ```
 
-Verify:
-
+**Connect Phone B:**
 ```bash
-sudo k3s kubectl get nodes
-```
-
-Or configure kubectl:
-
-```bash
-export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-kubectl get nodes
-```
-
-You should see:
-
-```
-phone-a   Ready   control-plane
-```
-
-k3s documentation:
-[https://docs.k3s.io/](https://docs.k3s.io/)
-
----
-
-# Creating a Multi-Node Cluster
-
-Install k3s agent on Phone B:
-
-```bash
-curl -sfL https://get.k3s.io | \
-K3S_URL=https://<phone-a-ip>:6443 \
-K3S_TOKEN=<node-token> sh -
-```
-
-Get token from Phone A:
-
-```bash
+# Get token from Phone A
 cat /var/lib/rancher/k3s/server/node-token
+
+# On Phone B
+curl -sfL https://get.k3s.io | \
+  K3S_URL=https://<phone-a-ip>:6443 \
+  K3S_TOKEN=<token> sh -
 ```
 
-Verify cluster:
-
-```bash
-kubectl get nodes
-```
-
-Now you have:
-
-```
-phone-a   Ready   control-plane
-phone-b   Ready   <none>
-```
-
----
-
-# Networking with Tailscale
-
-Phones are usually behind NAT.
-
-Kubernetes nodes must communicate directly.
-
-We use Tailscale (WireGuard-based mesh VPN):
-
-[https://tailscale.com/](https://tailscale.com/)
-
-Install on each device:
-
+**Setup Tailscale (both phones):**
 ```bash
 curl -fsSL https://tailscale.com/install.sh | sh
 sudo tailscale up
 ```
 
-Check connectivity:
+## Demo: LLM Integration
 
-```bash
-tailscale status
-```
+Uses [local-android-ai](https://github.com/parttimenerd/local-android-ai) for on-device inference.
 
-Each node gets a stable tailnet IP.
+1. Install APK on a phone
+2. Download model (Gemma 3.1B recommended)
+3. Label the node: `kubectl label node <phone> llm=true`
+4. Deploy chat app from `chat-demo/`
 
-Tailscale Kubernetes operator:
-[https://tailscale.com/blog/kubernetes-operator](https://tailscale.com/blog/kubernetes-operator)
-
-Blog: Using Tailscale with Kubernetes:
-[https://tailscale.com/blog/kubernetes-operator/](https://tailscale.com/blog/kubernetes-operator/)
-
-Advanced example (each node as subnet router):
-[https://blog.6nok.org/tailsk8s/](https://blog.6nok.org/tailsk8s/)
-
----
-
-# Demo Applications
-
----
-
-# Pong Server
-
-Purpose:
-
-* Demonstrate Pods
-* Demonstrate Deployments
-* Demonstrate Services
-* Show scheduling
-
-`pong.yaml`:
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: pong
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: pong
-  template:
-    metadata:
-      labels:
-        app: pong
-    spec:
-      containers:
-      - name: pong
-        image: your/pong-image
-        ports:
-        - containerPort: 8080
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: pong
-spec:
-  selector:
-    app: pong
-  ports:
-  - port: 80
-    targetPort: 8080
-```
-
-Deploy:
-
-```bash
-kubectl apply -f pong.yaml
-kubectl get pods -o wide
-```
-
-Scale:
-
-```bash
-kubectl scale deployment pong --replicas=3
-```
-
-Delete pod:
-
-```bash
-kubectl delete pod <pod-name>
-```
-
-Kubernetes will recreate it automatically.
-
----
-
-# Distributed Chat
-
-Chat backend:
-
-* Lightweight HTTP server
-* Logs hostname
-* Loads commands from config
-* Executes shell commands
-* Returns container + node name
-
-Each response includes:
-
-```
-Handled by: <container>
-Node: <node>
-```
-
-Scale:
-
-```bash
-kubectl scale deployment chat --replicas=3
-```
-
-Refresh UI repeatedly to see load balancing across phones.
-
----
-
-# LLM Integration
-
-**Purpose:** Show local inference on a phone node without cloud APIs
-
-**Tool:** [local-android-ai](https://github.com/parttimenerd/local-android-ai) by Johannes Bechberger
+The chat app can call the LLM via `/llm` commands.
 
 The LLM runs only on Phone B (native Android app).
 
@@ -348,17 +125,6 @@ The LLM runs only on Phone B (native Android app).
 
 1. Download APK from [GitHub Releases](https://github.com/parttimenerd/local-android-ai/releases)
 2. Install on phone-b
-3. Download model (Gemma 3.1B recommended for speed)
-   - Download from [HuggingFace](https://huggingface.co/) after accepting license
-   - Or let app download other models directly
-4. Load model into app ("Load Model" button)
-5. Test endpoint:
-   ```bash
-   curl http://localhost:8005
-   # Shows available APIs
-   ```
-6. Register command in chat ConfigMap:
-   ```yaml
    llm=curl -s -d '{"text":"${ARG}","model":"GEMMA_3_1B_IT"}' http://localhost:8005/ai/text | jq -r '.response'
    ```
 7. Label node:
@@ -444,26 +210,6 @@ Tailscale:
 
 ---
 
-# Why You Probably Shouldn’t Do This in Production
-
-* Phones throttle under load
-* No redundant power
-* Limited storage
-* Thermal instability
-* Not designed for 24/7 uptime
-
-This is a learning and demo environment.
-
-But:
-
-It demonstrates that Kubernetes is not about data centers.
-
-It is about orchestrating Linux machines.
-
-And phones are Linux machines.
-
----
-
 # Final Thought
 
 > The cloud is just someone else’s computer.
@@ -471,8 +217,104 @@ And phones are Linux machines.
 
 ---
 
-If you'd like, I can next:
+## TODO
 
-* Turn this into a polished GitHub-ready README with badges and repo structure
-* Add a `demo/` directory layout
-* Or write a blog-post version with narrative tone instead of technical tone
+### Interactive Terminal Feature (xterm.js)
+
+**Goal:** Run demo scripts directly from the slides in a terminal
+
+**Components:**
+
+1. **Backend (Node.js Terminal Server)**
+   - Location: `slides/terminal-server/`
+   - Dependencies: `ws` (WebSocket), `node-pty` (terminal emulation)
+   - Launch script: `slides/terminal-server/start.sh`
+   - Security: Only accept connections from localhost
+   - Reference: https://github.com/xtermjs/xterm.js/tree/master/demo
+   - API:
+     - `/health` - Check if server is running
+     - WebSocket endpoint for terminal I/O
+
+2. **Frontend (xterm.js Integration)**
+   - Dependencies:
+     - `xterm` - Core terminal
+     - `@xterm/addon-web-links` - Clickable links
+     - `@xterm/addon-clipboard` - Copy/paste support
+     - `@xterm/addon-fit` - Auto-resize terminal
+     - `@xterm/addon-search` - Terminal search
+   
+3. **Components:**
+   - `slides/components/RunTerminalComponent.vue`
+     - Modal with xterm.js terminal
+     - Auto-detect backend availability
+     - Execute commands via WebSocket
+     - Keyboard shortcut: Press 't' to open terminal
+   
+   - Update `slides/components/P.vue`
+     - Add run button when backend is detected
+     - Click opens RunTerminalComponent modal
+     - Pass script path to execute
+
+**Implementation Plan:**
+
+1. Create `slides/terminal-server/`:
+   ```
+   slides/terminal-server/
+   ├── package.json
+   ├── server.js          # WebSocket + node-pty
+   ├── start.sh           # Launch script
+   └── README.md          # Setup instructions
+   ```
+
+2. Install frontend dependencies in `slides/`:
+   ```bash
+   npm install xterm @xterm/addon-web-links @xterm/addon-clipboard \
+               @xterm/addon-fit @xterm/addon-search
+   ```
+
+3. Create `RunTerminalComponent.vue`:
+   - Modal overlay
+   - xterm.js instance with all addons
+   - WebSocket connection to backend
+   - Global keyboard listener for 't'
+   - Execute script on open
+
+4. Update `CodeWithScript.vue`:
+   - Fetch `/health` endpoint on mount
+   - Show run button if backend available
+   - Emit event to open RunTerminalComponent
+
+5. Register global keyboard shortcut in slides layout
+
+**Security:**
+- Backend only binds to 127.0.0.1
+- CORS restricted to localhost origins
+- No shell execution of arbitrary commands
+- Only execute scripts from whitelisted paths
+
+**Usage:**
+```bash
+# Terminal 1: Start backend
+cd slides/terminal-server
+npm install
+npm start
+
+# Terminal 2: Start slides
+cd slides
+npm run dev
+```
+
+Then in slides: Click run button or press 't' to open terminal
+
+---
+
+### Previous TODOs
+
+- Try to run the presentation on a phone
+- Implement code runners in Slidev that execute the scripts and show results in a modal popup
+
+
+
+
+
+

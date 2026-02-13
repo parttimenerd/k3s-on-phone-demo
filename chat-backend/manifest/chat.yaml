@@ -5,7 +5,7 @@ metadata:
   labels:
     app: chat
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: chat
@@ -14,6 +14,10 @@ spec:
       labels:
         app: chat
     spec:
+      nodeSelector:
+        llm: "true"
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: rqlite
           image: rqlite/rqlite:8.27.0

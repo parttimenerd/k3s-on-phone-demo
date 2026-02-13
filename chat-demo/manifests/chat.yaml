@@ -14,6 +14,10 @@ spec:
       labels:
         app: chat
     spec:
+      nodeSelector:
+        llm: "true"
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: rqlite
           image: rqlite/rqlite:8.27.0
@@ -31,10 +35,8 @@ spec:
           ports:
             - containerPort: 8080
               name: http
-              hostPort: 80
             - containerPort: 8005
               name: ai
-              hostPort: 8005
           env:
             - name: POD_NAME
               valueFrom:

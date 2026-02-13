@@ -6,8 +6,8 @@ cd "$(dirname "$0")/.."
 echo "Undeploying chat application..."
 echo ""
 
-kubectl delete -f chat-demo/manifests/chat.yaml
-kubectl delete -f chat-demo/manifests/chat-config.yaml
+sudo kubectl delete -f chat-demo/manifests/chat.yaml
+sudo kubectl delete -f chat-demo/manifests/chat-config.yaml
 
 echo ""
 echo "Chat application removed!"
