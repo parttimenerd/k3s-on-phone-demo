@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "slidev --open --port 3032",
     "build": "slidev build",
+    "build:gh-pages": "slidev build --base /k3s-on-phone-demo/",
     "export": "slidev export"
   },
   "dependencies": {
