@@ -30,7 +30,7 @@ jobs:
 
       - name: Build slides
         working-directory: slides
-        run: npm run build
+        run: slidev build --base /k3s-on-phone-demo/
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
