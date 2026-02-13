@@ -962,18 +962,14 @@ A stable network address for Pods
   
   <!-- Arrows to Pods -->
   <path d="M 380 155 L 470 95" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5" opacity="0.6"/>
-  <path d="M 380 200 L 500 200" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5" opacity="0.6"/>
   <path d="M 380 245 L 470 305" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5" opacity="0.6"/>
   
   <!-- Pods (much bigger) -->
   <rect x="470" y="40" width="150" height="70" fill="#8b5cf6" stroke="#6d28d9" stroke-width="2" rx="8"/>
   <text x="545" y="90" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Pod 1</text>
   
-  <rect x="500" y="165" width="150" height="70" fill="#8b5cf6" stroke="#6d28d9" stroke-width="2" rx="8"/>
-  <text x="575" y="220" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Pod 2</text>
-  
   <rect x="470" y="290" width="150" height="70" fill="#8b5cf6" stroke="#6d28d9" stroke-width="2" rx="8"/>
-  <text x="545" y="345" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Pod 3</text>
+  <text x="545" y="345" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Pod 2</text>
   
   <!-- Animated packets on curved paths -->
   <!-- Packet 1 → Pod 2 -->
@@ -992,14 +988,6 @@ A stable network address for Pods
     <circle r="7" class="packet"/>
   </g>
   
-  <!-- Packet 3 → Pod 3 -->
-  <g>
-    <animateMotion dur="2.5s" repeatCount="indefinite" begin="0.8s">
-      <mpath href="#path-to-pod3-1"/>
-    </animateMotion>
-    <circle r="7" class="packet"/>
-  </g>
-
   <!-- Packet 4 → Pod 1 -->
   <g>
   <animateMotion dur="4.5s" repeatCount="indefinite" begin="1.8s">
@@ -1016,21 +1004,12 @@ A stable network address for Pods
     <circle r="7" class="packet"/>
   </g>
   
-  <!-- Packet 6 → Pod 3 -->
-  <g>
-    <animateMotion dur="2.5s" repeatCount="indefinite" begin="2s">
-      <mpath href="#path-to-pod3-2"/>
-    </animateMotion>
-    <circle r="7" class="packet"/>
-  </g>
   
   <!-- Invisible paths for motion -->
   <path id="path-to-pod1-1" d="M 100 200 Q 360 140 545 75" fill="none"/>
-  <path id="path-to-pod2-1" d="M 100 200 L 500 200" fill="none"/>
-  <path id="path-to-pod3-1" d="M 100 200 Q 360 260 545 325" fill="none"/>
+  <path id="path-to-pod2-1" d="M 100 200 Q 360 260 545 325" fill="none"/>
   <path id="path-to-pod1-2" d="M 100 200 Q 360 140 545 75" fill="none"/>
-  <path id="path-to-pod2-2" d="M 100 200 L 500 200" fill="none"/>
-  <path id="path-to-pod3-2" d="M 100 200 Q 360 260 545 325" fill="none"/>
+  <path id="path-to-pod2-2" d="M 100 200 Q 360 260 545 325" fill="none"/>
 </svg>
 
 </div>
