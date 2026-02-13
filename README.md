@@ -1,4 +1,6 @@
-# Kubernetes on a Phone 📱☸️
+# Kubernetes on a Phone
+
+[![Slidev Build](https://github.com/parttimenerd/k3s-on-phone-demo/actions/workflows/slidev-build.yml/badge.svg)](https://github.com/parttimenerd/k3s-on-phone-demo/actions/workflows/slidev-build.yml)
 
 > Running a multi-node Kubernetes cluster on Android phones — with a distributed chat app and an on-device LLM.
 
@@ -53,7 +55,7 @@ The launcher will automatically install dependencies and start both the terminal
 
 ## Table of Contents
 
-- [Kubernetes on a Phone 📱☸️](#kubernetes-on-a-phone-️)
+- [Kubernetes on a Phone](#kubernetes-on-a-phone)
   - [Quick Start](#quick-start)
     - [Interactive Terminal Feature](#interactive-terminal-feature)
   - [Table of Contents](#table-of-contents)
@@ -68,8 +70,8 @@ The launcher will automatically install dependencies and start both the terminal
 - [Additional Useful References](#additional-useful-references)
 - [Final Thought](#final-thought)
   - [TODO](#todo)
-    - [Interactive Terminal Feature (xterm.js)](#interactive-terminal-feature-xtermjs)
-    - [Previous TODOs](#previous-todos)
+    - [Completed ✅](#completed-)
+    - [Remaining](#remaining)
 
 ---
 
@@ -219,99 +221,19 @@ Tailscale:
 
 ## TODO
 
-### Interactive Terminal Feature (xterm.js)
+### Completed ✅
 
-**Goal:** Run demo scripts directly from the slides in a terminal
+- **Interactive Terminal Feature (xterm.js)**
+  - Backend terminal server in `slides/terminal-server/`
+  - Frontend modal terminal with xterm.js
+  - Run buttons in `CodeWithScript` + `t` shortcut
+  - Script execution restricted to demo paths
+- **GitHub Actions CI**
+  - Slidev build workflow in `.github/workflows/slidev-build.yml`
 
-**Components:**
-
-1. **Backend (Node.js Terminal Server)**
-   - Location: `slides/terminal-server/`
-   - Dependencies: `ws` (WebSocket), `node-pty` (terminal emulation)
-   - Launch script: `slides/terminal-server/start.sh`
-   - Security: Only accept connections from localhost
-   - Reference: https://github.com/xtermjs/xterm.js/tree/master/demo
-   - API:
-     - `/health` - Check if server is running
-     - WebSocket endpoint for terminal I/O
-
-2. **Frontend (xterm.js Integration)**
-   - Dependencies:
-     - `xterm` - Core terminal
-     - `@xterm/addon-web-links` - Clickable links
-     - `@xterm/addon-clipboard` - Copy/paste support
-     - `@xterm/addon-fit` - Auto-resize terminal
-     - `@xterm/addon-search` - Terminal search
-   
-3. **Components:**
-   - `slides/components/RunTerminalComponent.vue`
-     - Modal with xterm.js terminal
-     - Auto-detect backend availability
-     - Execute commands via WebSocket
-     - Keyboard shortcut: Press 't' to open terminal
-   
-   - Update `slides/components/P.vue`
-     - Add run button when backend is detected
-     - Click opens RunTerminalComponent modal
-     - Pass script path to execute
-
-**Implementation Plan:**
-
-1. Create `slides/terminal-server/`:
-   ```
-   slides/terminal-server/
-   ├── package.json
-   ├── server.js          # WebSocket + node-pty
-   ├── start.sh           # Launch script
-   └── README.md          # Setup instructions
-   ```
-
-2. Install frontend dependencies in `slides/`:
-   ```bash
-   npm install xterm @xterm/addon-web-links @xterm/addon-clipboard \
-               @xterm/addon-fit @xterm/addon-search
-   ```
-
-3. Create `RunTerminalComponent.vue`:
-   - Modal overlay
-   - xterm.js instance with all addons
-   - WebSocket connection to backend
-   - Global keyboard listener for 't'
-   - Execute script on open
-
-4. Update `CodeWithScript.vue`:
-   - Fetch `/health` endpoint on mount
-   - Show run button if backend available
-   - Emit event to open RunTerminalComponent
-
-5. Register global keyboard shortcut in slides layout
-
-**Security:**
-- Backend only binds to 127.0.0.1
-- CORS restricted to localhost origins
-- No shell execution of arbitrary commands
-- Only execute scripts from whitelisted paths
-
-**Usage:**
-```bash
-# Terminal 1: Start backend
-cd slides/terminal-server
-npm install
-npm start
-
-# Terminal 2: Start slides
-cd slides
-npm run dev
-```
-
-Then in slides: Click run button or press 't' to open terminal
-
----
-
-### Previous TODOs
+### Remaining
 
 - Try to run the presentation on a phone
-- Implement code runners in Slidev that execute the scripts and show results in a modal popup
 
 
 
