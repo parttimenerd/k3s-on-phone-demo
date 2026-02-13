@@ -32,6 +32,11 @@ jobs:
         working-directory: slides
         run: npm run build:gh-pages
 
+      - name: Copy static images
+        run: |
+          rm -rf slides/dist/img
+          cp -R slides/img slides/dist/img
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
