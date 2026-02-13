@@ -327,7 +327,7 @@ layout: statement
 ---
 
 # They are the perfect 
-# <span color="red">IOT</span> device.
+# <span style="color: rgb(93, 60, 251)">IOT</span> device.
 
 ---
 
@@ -525,15 +525,11 @@ Kubernetes runs in Debian. Debian runs on Android. Simple."
 
 # Android Is Linux (But We Need Debian)
 
-<v-clicks>
-
 1. Android OS runs on Linux kernel
 2. Use Linux Terminal App
 3. Create emulated Debian environment
 4. Install k3s inside Debian
 5. Run your containers
-
-</v-clicks>
 
 <!--
 "Android runs on the Linux kernel, but running Kubernetes directly on Android is tricky.
@@ -938,7 +934,7 @@ layout: default
 A stable network address for Pods
 
 <div class="text-center">
-<svg viewBox="-10 0 700 400" class="mx-auto" style="max-width: 100%; height: 400px;">
+<svg viewBox="-20 0 700 400" class="mx-auto" style="max-width: 100%; height: 400px;">
   <defs>
     <style>
       .packet {
@@ -1003,10 +999,10 @@ A stable network address for Pods
     </animateMotion>
     <circle r="7" class="packet"/>
   </g>
-  
+
   <!-- Packet 4 → Pod 1 -->
   <g>
-    <animateMotion dur="2.5s" repeatCount="indefinite" begin="1.2s">
+  <animateMotion dur="4.5s" repeatCount="indefinite" begin="1.8s">
       <mpath href="#path-to-pod1-2"/>
     </animateMotion>
     <circle r="7" class="packet"/>
@@ -1487,7 +1483,90 @@ Scaling is instant. Kubernetes automatically schedules the new pod.
 
 # Load Balancing in Action
 
-Kubernetes distributes traffic across all available replicas.
+Kubernetes distributes traffic across all available replicas **because of the Service** (the `LoadBalancer` type just exposes it externally).
+
+
+<div class="text-center">
+<svg viewBox="-20 0 700 400" class="mx-auto" style="max-width: 100%; height: 400px;">
+  <defs>
+    <style>
+      .packet {
+        fill: #10b981;
+        filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.8));
+      }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#666" />
+    </marker>
+  </defs>
+  
+  <!-- Internet Cloud -->
+  <g>
+    <text x="47" y="240" text-anchor="middle" fill="#6366f1" font-size="30" font-weight="bold">☁️</text>
+  </g>
+  
+  <!-- Arrow to Service -->
+  <path d="M 100 200 L 210 200" stroke="#999" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Service -->
+  <rect x="210" y="130" width="170" height="140" fill="#f97316" stroke="#c2410c" stroke-width="2" rx="10"/>
+  <text x="295" y="175" text-anchor="middle" fill="white" font-size="11" font-weight="bold">Service</text>
+  <text x="295" y="220" text-anchor="middle" fill="white" font-size="8">10.0.0.1:80</text>
+  
+  <!-- Arrows to Pods -->
+  <path d="M 380 155 L 470 95" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5" opacity="0.6"/>
+  <path d="M 380 245 L 470 305" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5" opacity="0.6"/>
+  
+  <!-- Pods (much bigger) -->
+  <rect x="470" y="40" width="150" height="70" fill="#8b5cf6" stroke="#6d28d9" stroke-width="2" rx="8"/>
+  <text x="545" y="90" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Pod 1</text>
+  
+  <rect x="470" y="290" width="150" height="70" fill="#8b5cf6" stroke="#6d28d9" stroke-width="2" rx="8"/>
+  <text x="545" y="345" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Pod 2</text>
+  
+  
+  <!-- Animated packets on curved paths -->
+  <!-- Packet 1 → Pod 2 -->
+  <g>
+    <animateMotion dur="2.5s" repeatCount="indefinite">
+      <mpath href="#path-to-pod2-1"/>
+    </animateMotion>
+    <circle r="7" class="packet"/>
+  </g>
+  
+  <!-- Packet 2 → Pod 1 -->
+  <g>
+    <animateMotion dur="2.5s" repeatCount="indefinite" begin="0.4s">
+      <mpath href="#path-to-pod1-1"/>
+    </animateMotion>
+    <circle r="7" class="packet"/>
+  </g>
+  
+  <!-- Packet 4 → Pod 1 -->
+  <g>
+    <animateMotion dur="2.5s" repeatCount="indefinite" begin="1.2s">
+      <mpath href="#path-to-pod1-2"/>
+    </animateMotion>
+    <circle r="7" class="packet"/>
+  </g>
+  
+  <!-- Packet 5 → Pod 2 -->
+  <g>
+  <animateMotion dur="4.5s" repeatCount="indefinite" begin="2.4s">
+      <mpath href="#path-to-pod2-2"/>
+    </animateMotion>
+    <circle r="7" class="packet"/>
+  </g>
+  
+  
+  <!-- Invisible paths for motion -->
+  <path id="path-to-pod1-1" d="M 100 200 Q 360 140 545 75" fill="none"/>
+  <path id="path-to-pod2-1" d="M 100 200 Q 360 260 545 325" fill="none"/>
+  <path id="path-to-pod1-2" d="M 100 200 Q 360 140 545 75" fill="none"/>
+  <path id="path-to-pod2-2" d="M 100 200 Q 360 260 545 325" fill="none"/>
+</svg>
+
+</div>
 
 </PhoneTwoColumnZoom>
 

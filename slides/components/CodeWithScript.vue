@@ -4,21 +4,27 @@
       <slot></slot>
     </div>
     <div class="script-pill">
-      <span class="script-icon" aria-hidden="true">
-        <svg viewBox="0 0 12 12" width="10" height="10" role="presentation">
-          <path d="M3 2.2v7.6L9.2 6 3 2.2z" fill="currentColor" />
-        </svg>
-      </span>
-      <code>{{ scriptPath }}</code>
       <button
-        v-if="showRunButton"
-        class="run-button"
+        class="script-icon-button"
         type="button"
-        title="Run script in terminal"
+        :disabled="!canRun"
+        :title="canRun ? 'Run script in terminal' : 'Terminal not available'"
         @click="handleRunClick"
       >
-        Run
+        <span class="script-icon" aria-hidden="true">
+          <slot v-if="!canRun" name="run-icon-disabled">
+            <svg viewBox="0 0 12 12" width="10" height="10" role="presentation">
+              <path d="M3 2.2v7.6L9.2 6 3 2.2z" fill="currentColor" />
+            </svg>
+          </slot>
+          <slot v-else name="run-icon">
+            <svg viewBox="0 0 12 12" width="10" height="10" role="presentation">
+              <path d="M3 2.2v7.6L9.2 6 3 2.2z" fill="currentColor" />
+            </svg>
+          </slot>
+        </span>
       </button>
+      <code>{{ scriptPath }}</code>
     </div>
   </div>
 </template>
@@ -56,7 +62,7 @@ const props = defineProps<{
 
 const isTerminalAvailable = ref(false)
 
-const showRunButton = computed(() => isTerminalAvailable.value)
+const canRun = computed(() => isTerminalAvailable.value)
 
 async function checkTerminalAvailability() {
   const cacheWindow = getAvailabilityCache()
@@ -109,6 +115,9 @@ async function checkTerminalAvailability() {
 }
 
 function handleRunClick() {
+  if (!canRun.value) {
+    return
+  }
   console.info('[code-with-script] run clicked', { scriptPath: props.scriptPath })
   const openTerminal = (window as Window & { openTerminal?: (scriptPath: string) => void })
     .openTerminal
@@ -185,7 +194,6 @@ onUnmounted(() => {
 .script-icon {
   display: inline-flex;
   align-items: center;
-  opacity: 0.8;
 }
 
 .script-icon svg {
@@ -200,20 +208,30 @@ onUnmounted(() => {
   font-size: 10px;
 }
 
-.run-button {
-  margin-left: 6px;
+.script-icon-button {
   border: none;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.18);
   color: white;
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 10px;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s ease;
+  padding: 0;
 }
 
-.run-button:hover {
-  background: rgba(255, 255, 255, 0.28);
+.script-icon-button:hover {
+  background: rgba(255, 255, 255, 0.32);
+  transform: scale(1.05);
+}
+
+.script-icon-button:disabled {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: not-allowed;
+  transform: none;
 }
 </style>
