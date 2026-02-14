@@ -1509,8 +1509,8 @@ Kubernetes distributes traffic across all available replicas **because of the Se
   <text x="295" y="220" text-anchor="middle" fill="white" font-size="8">10.0.0.1:80</text>
   
   <!-- Arrows to Pods -->
-  <path d="M 380 155 L 470 95" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5" opacity="0.6"/>
-  <path d="M 380 245 L 470 305" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5" opacity="0.6"/>
+  <path d="M 380 200 L 470 75" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5" opacity="0.6"/>
+  <path d="M 380 200 L 470 325" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5" opacity="0.6"/>
   
   <!-- Pods (much bigger) -->
   <rect x="470" y="40" width="150" height="70" fill="#8b5cf6" stroke="#6d28d9" stroke-width="2" rx="8"/>
@@ -1524,7 +1524,7 @@ Kubernetes distributes traffic across all available replicas **because of the Se
   <!-- Packet 1 → Pod 2 -->
   <g>
     <animateMotion dur="2.5s" repeatCount="indefinite">
-      <mpath href="#path-to-pod2-1"/>
+      <mpath href="#path-to-pod3-1"/>
     </animateMotion>
     <circle r="7" class="packet"/>
   </g>
@@ -1548,7 +1548,7 @@ Kubernetes distributes traffic across all available replicas **because of the Se
   <!-- Packet 5 → Pod 2 -->
   <g>
   <animateMotion dur="4.5s" repeatCount="indefinite" begin="2.4s">
-      <mpath href="#path-to-pod2-2"/>
+      <mpath href="#path-to-pod3-2"/>
     </animateMotion>
     <circle r="7" class="packet"/>
   </g>
@@ -1557,8 +1557,10 @@ Kubernetes distributes traffic across all available replicas **because of the Se
   <!-- Invisible paths for motion -->
   <path id="path-to-pod1-1" d="M 100 200 Q 360 140 545 75" fill="none"/>
   <path id="path-to-pod2-1" d="M 100 200 Q 360 260 545 325" fill="none"/>
-  <path id="path-to-pod1-2" d="M 100 200 Q 360 140 545 75" fill="none"/>
+  <path qid="path-to-pod1-2" d="M 100 200 Q 360 140 545 75" fill="none"/>
   <path id="path-to-pod2-2" d="M 100 200 Q 360 260 545 325" fill="none"/>
+  <path id="path-to-pod3-1" d="M 100 200 Q 360 260 545 325" fill="none"/>
+  <path id="path-to-pod3-2" d="M 100 200 Q 360 260 545 325" fill="none"/>
 </svg>
 
 </div>
