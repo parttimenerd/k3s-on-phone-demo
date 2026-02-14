@@ -39,19 +39,13 @@ import qrGithub from './img/qr-k3s-github.png'
   border-radius: 12px;
   padding: 16px 18px;
   box-shadow: 0 12px 24px rgba(15, 23, 42, 0.25);
+  font-size: 100px;
 }
-
-.slidev-slide code {
-  font-size: 0.95em;
-}
-
-.slidev-slide .shiki code {
-  white-space: pre-wrap;
-}
-
-.slidev-slide pre code {
-  font-weight: 500;
-  color: #f8fafc;
+.slidev-layout pre, .slidev-layout code {
+    -webkit-user-select: text;
+    user-select: text;
+    font-size: 0.9em !important;
+    white-space: pre-wrap;
 }
 </style>
 
@@ -105,7 +99,7 @@ Pause for 3 seconds. Let it sink in.
 - VPN connecting them across networks
 - Deploy apps, scale them, kill them
 - Run an AI on one of them
-- <span v-mark.orange="5">Learning the basics of Kubernetes along the way.</span>
+- <span v-mark.orange>Learning the basics of Kubernetes along the way.</span>
 
 <div class="text-sm mt-8">
 <OrangeText><strong>Caveat:</strong> I'm not a Kubernetes expert. This is all for fun. Think of it as an extreme educational exercise.</OrangeText>
@@ -167,15 +161,15 @@ Hard to use it effectively."
 <v-clicks>
 
 <div class="text-5xl text-center mt-8">
-You can <span class="font-bold">touch</span> the nodes
+You can <BlueText><span class="font-bold">touch</span></BlueText> the nodes
 </div>
 
 <div class="text-4xl text-center mt-4">
-You can <span class="font-bold">feel</span> them heat up under load
+You can <BlueText><span class="font-bold">feel</span></BlueText> them heat up under load
 </div>
 
 <div class="text-3xl text-center mt-4">
-You can <span class="font-bold">watch</span> the battery drain
+You can <RedText><span class="font-bold">watch</span></RedText> the battery drain
 </div>
 
 </v-clicks>
@@ -249,7 +243,7 @@ This was a production server:
 - 4 CPU cores @ 2.4 GHz
 - 4-8 GB DDR3 RAM
 - 500 GB HDD (7200 RPM)
-- <span v-mark.orange="5">It ran WordPress for 50,000 daily users</span>
+- <span v-mark.orange>It ran WordPress for 50,000 daily users</span>
 
 <ImageAttribution>
 By Victor Grigas - Own work, CC BY-SA 3.0
@@ -278,7 +272,7 @@ image: ./img/cover.jpg
 - ARM Mali-G715 MP7 GPU
 - 12 GB LPDDR5X memory
 - 256 GB UFS 4.0 storage (faster than SATA SSDs)
-- <span v-mark.orange="5">More powerful than that 2010 server</span>
+- <span v-mark.orange>More powerful than that 2010 server</span>
 
 <!--
 "A modern phone has nine cores—more than twice what that server had.
@@ -1421,7 +1415,8 @@ spec:
 <CodeWithScript scriptPath="./echo-demo/scripts/03-deploy-echo.sh">
 ```bash
 kubectl apply -f echo-demo/manifests/echo.yaml
-kubectl wait --for=condition=ready pod -l app=echo \
+kubectl wait --for=condition=ready \ 
+  pod -l app=echo \
   --timeout=60s
 kubectl get pods -o wide
 ```
