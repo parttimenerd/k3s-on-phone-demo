@@ -1420,7 +1420,8 @@ spec:
 # Run the Deployment
 
 <CodeWithScript scriptPath="./echo-demo/scripts/03-deploy-echo.sh">
-```bash
+
+```bash{all|1}
 kubectl apply -f echo-demo/manifests/echo.yaml
 kubectl wait --for=condition=ready \ 
   pod -l app=echo \
@@ -1429,12 +1430,10 @@ kubectl get pods -o wide
 ```
 </CodeWithScript>
 
-This script:
-1. Applies the deployment and service
-2. Waits for all pods to be ready
-3. Shows the running pods
+<v-click>
 
-The service automatically sets up a LoadBalancer endpoint.
+Deploy and wait till running.
+</v-click>
 
 </PhoneTwoColumnZoom>
 
