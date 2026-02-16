@@ -599,7 +599,7 @@ layout: statement
 
 ---
 
-<PhoneTwoColumn img="./img/linux_terminal_error.png">
+<PhoneTwoColumn img="./img/linux_terminal_error.png" :clickToReveal="true">
 
 # Linux Terminal App Performance
 
@@ -852,7 +852,7 @@ backgroundSize: 90%
 
 Declares desired state. "I want 3 of these running."
 
-```yaml
+```yaml{all|2-4|6|10-19|17|all}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -881,6 +881,10 @@ You say 'I want 3 replicas of this app.'
 Kubernetes figures out the rest."
 
 "If one crashes, Kubernetes notices and creates a new one. Automatically."
+
+first: name
+then the replicas
+
 -->
 
 <ImageAttribution>
@@ -1100,9 +1104,12 @@ Scheduler looks at:
 
 </div>
 
+<div>
 <div v-click>
 <strong>Task:</strong> Replicate three times
+</div>
 
+<div v-click class="mt-4">
 <strong>Decision:</strong>
 
 <table class="mt-4">
@@ -1127,7 +1134,7 @@ Scheduler looks at:
 </tr>
 </tbody>
 </table>
-
+</div>
 </div>
 
 </div>
