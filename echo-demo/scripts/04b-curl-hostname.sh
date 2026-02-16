@@ -8,7 +8,7 @@ echo ""
 
 for i in {1..5}; do
   echo "Request $i:"
-  curl -s "http://127.0.0.1:30080?echo_env_body=HOST_NAME"
+  curl -s "http://127.0.0.1:30080?echo_env_body=HOSTNAME"
   echo ""
   sleep 1
 done

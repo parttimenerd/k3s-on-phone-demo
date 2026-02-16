@@ -1461,7 +1461,7 @@ The service responds with details about which pod handled the request.
 
 <CodeWithScript scriptPath="./echo-demo/scripts/04b-curl-hostname.sh">
 ```bash
-curl http://127.0.0.1:30080?echo_env_body=HOSTNAME
+curl http://127.0.0.1:30080?echo_env_body=HOST_NAME
 ```
 </CodeWithScript>
 
