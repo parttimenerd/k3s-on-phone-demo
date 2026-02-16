@@ -3,7 +3,12 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-echo "Testing Echo Service - Getting Hostname"
+echo "Querying echo service to see which pod handles the request..."
 echo ""
-echo "curl http://127.0.0.1:30080?echo_env_body=HOSTNAME"
-curl "http://127.0.0.1:30080?echo_env_body=HOSTNAME"
+
+for i in {1..5}; do
+  echo "Request $i:"
+  curl -s "http://127.0.0.1:30080?echo_env_body=HOST_NAME"
+  echo ""
+  sleep 1
+done
