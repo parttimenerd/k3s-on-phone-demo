@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
-
-sudo apt install -y curl > /dev/null 2>&1 || apt install -y curl > /dev/null 2>&1
+cd "$(dirname "$0")/"
 
 if [ -d "/var/lib/rancher/k3s/server" ]; then
 	echo "Existing k3s data detected."

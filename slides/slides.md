@@ -1260,7 +1260,7 @@ graph TB
 Follow along on your device:
 
 ```bash
-sudo apt update; sudo apt install git
+sudo apt update; sudo apt install git curl
 git clone https://github.com/parttimenerd/k3s-on-phone-demo
 cd k3s-on-phone-demo
 ```
