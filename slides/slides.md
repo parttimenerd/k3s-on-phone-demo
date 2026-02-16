@@ -1415,7 +1415,7 @@ spec:
 
 ---
 
-<PhoneTwoColumnZoom img="./img/deploy.png" :clickToReveal=true>
+<PhoneTwoColumnZoom img="./img/deploy-echo.png" :clickToReveal=true>
 
 # Run the Deployment
 
@@ -1455,13 +1455,13 @@ The service responds with details about which pod handled the request.
 
 ---
 
-<PhoneTwoColumnZoom img="./img/curl2.png">
+<PhoneTwoColumnZoom img="./img/curl.png">
 
 # Test the Load Balancing
 
 <CodeWithScript scriptPath="./echo-demo/scripts/04b-curl-hostname.sh">
 ```bash
-curl http://127.0.0.1:30080?echo_env_body=HOST_NAME
+curl http://127.0.0.1:30080?echo_env_body=HOSTNAME
 ```
 </CodeWithScript>
 
@@ -1471,7 +1471,7 @@ The service responds with details about which pod handled the request.
 
 ---
 
-<PhoneTwoColumnZoom img="./img/scale.png">
+<PhoneTwoColumnZoom img="./img/scale-echo.png" :clickToReveal=true>
 
 # Scale the Deployment
 
@@ -1496,7 +1496,7 @@ Then run
 kubectl apply -f echo-demo/manifests/echo.yaml
 ```
 </template>
-<template #3>
+<template #3-4>
 <span v-mark="{at: 2, color: 'orange'}">Scaling is instant.</span> Kubernetes automatically schedules the new pod.
 </template>
 </v-switch>
@@ -1521,12 +1521,73 @@ curl http://127.0.0.1:30080?echo_env_body=HOSTNAME
 
 ---
 
+<PhoneTwoColumnZoom img="./img/undeploy-echo.png">
+
+# Undeploy the Cluster
+
+<CodeWithScript scriptPath="./echo-demo/scripts/06-undeploy-echo.sh">
+```bash
+kubectl delete -f echo-demo/manifests/echo.yaml
+```
+</CodeWithScript>
+
+This removes everything:
+- Deployment
+- Service
+- All running pods
+
+</PhoneTwoColumnZoom>
+
+---
+layout: statement
+---
+
+# So, yes: <RedText>Phones</RedText> can run <BlueText>Kubernetes</BlueText>.
+
+---
+
+# The Real Lesson
+
+<div class="text-4xl text-orange-400 font-bold">
+Kubernetes isn't magic
+</div>
+
+<v-clicks>
+
+- It's just software
+- Running on Linux
+- Making decisions based on rules
+
+<div class="text-orange-400 font-bold mt-4">You can understand it</div>
+
+</v-clicks>
+
+<!--
+"Kubernetes feels intimidating.
+
+There's so much to learn.
+So many concepts.
+So many YAML files.
+
+But at its core, it's simple:
+
+You say what you want.
+Kubernetes makes it happen.
+
+That's it."
+-->
+
+---
+src: ./multi-node.md
+---
+
 # Resources
 
 - **This project:** github.com/parttimenerd/k3s-on-phone-demo
 - **LLM app:** github.com/parttimenerd/local-android-ai
 - **k3s docs:** k3s.io
 - **Tailscale:** tailscale.com
+- **Tailscale Cleanup:** [github.com/HenryHolloway/TailscaleMachineEater](https://github.com/HenryHolloway/TailscaleMachineEater)
 - **Linux Terminal App:** Google Play (Pixel devices, Android 15+) <div v-click class="text-orange-400 font-bold mt-4"> Everything is open source. Everything is documented. </div>
 - **Different Approach:** PostmarketOS, see https://blog.denv.it/posts/pmos-k3s-cluster/
 

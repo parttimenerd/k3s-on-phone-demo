@@ -72,3 +72,4 @@ chat-backend/out/
 # Echo demo
 echo-demo/manifests/*.bak
 echo-demo/scripts/*.bak
+.tailscale-key
