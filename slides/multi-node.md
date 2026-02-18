@@ -232,12 +232,14 @@ Installs Tailscale and connects with hostname `phone-b`.
 # Join Second Phone to Cluster
 
 ```bash
-./echo-demo/scripts/08-join-cluster.sh phone-a
+./echo-demo/scripts/08-join-cluster.sh
 # Essentially:
 curl -sfL https://get.k3s.io | \
   K3S_URL=https://$CONTROL_PLANE_HOSTNAME:6443 \
-  K3S_TOKEN=$K3S_TOKEN \
+  K3S_TOKEN=$K3S_TOKEN K3S_NODE_NAME=$NODE_NAME \
+  K3S_CLUSTER_CIDR=10.42.0.0/16 \
   sh -
+
 ```
 
 This script:
@@ -253,22 +255,17 @@ This script:
 
 
 <!--
-"Now we run the join script on the second phone.
-We pass the hostname 'phone-a' - that's the control plane.
+"The join script is simple but powerful. It defaults to phone-a as the control plane and phone-b as the node name.
 
-Thanks to Tailscale, hostnames just work.
-No need to look up IP addresses.
+The critical part is K3S_CLUSTER_CIDR=10.42.0.0/16. Without it, the second node's pods get a completely different IP range, and they can't reach pods on the first node. With it, both nodes allocate sub-ranges from the same /16, so Flannel can route between them.
 
-We've pre-configured both phones with the token 'abc'.
-This makes the demo smooth and repeatable.
+Flannel is k3s's networking plugin - think of it as a postal service for pods across nodes. Each node gets a unique pod subnet like 10.42.0.0/24 and 10.42.1.0/24. Flannel adds routes so packets destined for a remote pod CIDR get tunneled through the physical network - in this case, through Tailscale. Without Flannel coordinating those routes, pods on different nodes would be completely isolated.
 
-Again, this is only acceptable because we're in a private VPN.
-In production, you'd use the auto-generated secure token from k3s.
+We use a simple token 'abc' which is only acceptable because we're in a private VPN. In production, you'd use the secure auto-generated token from k3s.
 
-The script then installs k3s in agent mode and joins the cluster."
-
-Pause. "This takes a minute or two."
+This takes about a minute or two. While we wait, just know that behind the scenes, k3s is registering the new node, distributing certificates, and setting up all the networking plumbing."
 -->
+
 
 </PhoneTwoColumnZoom>
 
@@ -369,15 +366,13 @@ Watch as it schedules pods across both phones."
 
 <CodeWithScript scriptPath="./echo-demo/scripts/04b-curl-hostname.sh">
 ```bash
-./echo-demo/scripts/04b-curl-hostname.sh
+curl http://127.0.0.1:30080?echo_env_body=HOSTNAME
 ```
 </CodeWithScript>
 
-Makes multiple requests to the LoadBalancer service's external IP.
+Makes multiple requests, showing the NODE_NAME in the response.
 
 Notice how traffic is distributed across **different physical devices**.
-
-The script automatically discovers the service's external IP—no manual configuration needed.
 
 </PhoneTwoColumnZoom>
 
@@ -614,7 +609,7 @@ Connect the phone to Tailscale so it can join the cluster.
 
 <CodeWithScript scriptPath="./echo-demo/scripts/08-join-cluster.sh">
 ```bash
-./echo-demo/scripts/08-join-cluster.sh phone-a
+./echo-demo/scripts/08-join-cluster.sh
 ```
 </CodeWithScript>
 
