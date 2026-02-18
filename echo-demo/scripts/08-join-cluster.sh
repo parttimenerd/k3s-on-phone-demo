@@ -3,14 +3,9 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-# Check for required argument
-if [ $# -ne 1 ]; then
-  echo "Usage: $0 <control-plane-hostname>"
-  echo "Example: $0 phone-a"
-  exit 1
-fi
-
-CONTROL_PLANE_HOSTNAME=$1
+# Defaults: control plane = phone-a, node name = phone-b
+CONTROL_PLANE_HOSTNAME="${1:-phone-a}"
+NODE_NAME="${2:-phone-b}"
 
 echo "Join Second Phone to Cluster"
 echo "============================="
@@ -30,10 +25,11 @@ K3S_TOKEN="abc"
 
 echo ""
 echo "Step 3: Installing k3s agent on this phone..."
+echo "Node name: $NODE_NAME"
 echo "This will join the cluster as a worker node."
 echo ""
 
-curl -sfL https://get.k3s.io | K3S_URL=https://$CONTROL_PLANE_HOSTNAME:6443 K3S_TOKEN=$K3S_TOKEN sh -
+curl -sfL https://get.k3s.io | K3S_URL=https://$CONTROL_PLANE_HOSTNAME:6443 K3S_TOKEN=$K3S_TOKEN K3S_NODE_NAME=$NODE_NAME K3S_CLUSTER_CIDR=10.42.0.0/16 sh -
 
 echo ""
 echo "Join complete! Verify on control plane with:"
