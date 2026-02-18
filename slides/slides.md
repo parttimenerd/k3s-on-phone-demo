@@ -69,15 +69,12 @@ layout: center
 # This Is Not a Joke
 
 ```sh
-kubectl get nodes
+> kubectl get nodes
 NAME      STATUS   ROLES           AGE
 phone-a   Ready    control-plane   30m
 phone-b   Ready    <none>          10m
 ```
 
-TODO: actual screenshot
-
-<!--
 <!--
 Physically hold up the two phones.
 Shock and awe. Make them lean forward.
@@ -98,7 +95,6 @@ Pause for 3 seconds. Let it sink in.
 - Multi-node Kubernetes cluster on Android phones
 - VPN connecting them across networks
 - Deploy apps, scale them, kill them
-- Run an AI on one of them
 - <span v-mark.orange>Learning the basics of Kubernetes along the way.</span>
 
 <div class="text-sm mt-8">
@@ -290,18 +286,14 @@ Pause.
 
 # Phones Are Ridiculous Now
 
-| Spec | 2010 Server | 2024 Phone | 2025 Phone |
-|------|-------------|------------|------------|
-| CPU Cores | 4 | <span class="text-orange-400 font-bold">9</span> | <span class="text-orange-400 font-bold">8</span> |
-| CPU Speed | 2.4 GHz | <span class="text-orange-400 font-bold">3.0 GHz (prime core)</span> | <span class="text-orange-400 font-bold">4.47 GHz (Oryon L)</span> |
-| RAM | 4-8 GB DDR3 | <span class="text-orange-400 font-bold">12 GB LPDDR5X</span> | <span class="text-orange-400 font-bold">12 GB LPDDR5X</span> |
-| Storage | HDD (100 MB/s) | <span class="text-orange-400 font-bold">UFS 4.0 (4,000 MB/s)</span> | <span class="text-orange-400 font-bold">UFS 4.0 (4,000 MB/s)</span> |
-| GPU | - | Mali-G715 MP7 | <span class="text-orange-400 font-bold">Adreno 830</span> |
-| Process | 45nm+ | 4nm | <span class="text-orange-400 font-bold">3nm</span> |
-
-<div v-click class="text-xl text-orange-400 font-bold mt-4">
-2025 phones: 8 cores (2x 4.47 GHz + 6x 3.53 GHz Oryon), Samsung S25 Ultra
-</div>
+| Spec | 2010 Server | 2024 Phone |
+|------|-------------|------------|
+| CPU Cores | 4 | <span class="text-orange-400 font-bold">9</span> |
+| CPU Speed | 2.4 GHz | <span class="text-orange-400 font-bold">3.0 GHz (prime core)</span> |
+| RAM | 4-8 GB DDR3 | <span class="text-orange-400 font-bold">12 GB LPDDR5X</span> |
+| Storage | HDD (100 MB/s) | <span class="text-orange-400 font-bold">UFS 4.0 (4,000 MB/s)</span> |
+| GPU | - | <span class="text-orange-400 font-bold">Mali-G715 MP7</span> |
+| Process | 45nm+ | <span class="text-orange-400 font-bold">4nm</span> |
 
 <!--
 "Look at these numbers.
@@ -318,16 +310,9 @@ Pause for laughs.
 -->
 
 ---
-layout: statement
----
-
-# They are the perfect
-# <span style="color: rgb(93, 60, 251)">IOT</span> device.
-
----
 
 <div class="text-6xl font-bold text-center mt-8 text-orange-400">
-It has everything you need
+They have all you need
 </div>
 
 <v-clicks>
@@ -349,53 +334,6 @@ And all this in a <span class="font-bold">readily available, compact</span> pack
 </div>
 
 </v-clicks>
----
-
-# Geekbench
-
-<div class="mt-8">
-
-**Single-Core Performance:**
-
-<div class="flex items-center gap-4 mt-4">
-<div class="text-sm w-32">2010 Server</div>
-<div class="bg-gray-600 h-8" style="width: 17.5%">350</div>
-</div>
-
-<div class="flex items-center gap-4 mt-2">
-<div class="text-sm w-32 text-orange-400 font-bold">2024 Phone</div>
-<div class="bg-orange-400 h-8" style="width: 64.4%">1288</div>
-</div>
-
-**Multi-Core Performance:**
-
-<div class="flex items-center gap-4 mt-8">
-<div class="text-sm w-32">2010 Server</div>
-<div class="bg-gray-600 h-8" style="width: 24.7%">1112</div>
-</div>
-
-<div class="flex items-center gap-4 mt-2">
-<div class="text-sm w-32 text-orange-400 font-bold">2024 Phone</div>
-<div class="bg-orange-400 h-8" style="width: 75.3%">3393</div>
-</div>
-
-</div>
-
-<div v-click class="text-2xl text-orange-400 font-bold mt-8 text-center">
-Your pocket is more powerful than a 2010 data center
-</div>
-
-<!--
-"These bars tell the story.
-
-Single-core: The phone is nearly 4 times faster.
-Multi-core: Over 3 times faster.
-
-And this is comparing to a real production server.
-The Dell PowerEdge M610 powered thousands of websites.
-
-Now that power fits in your pocket."
--->
 
 ---
 
@@ -504,6 +442,11 @@ Why Android can run Kubernetes
 - **iptables** — Network routing and firewall
 - **Overlay filesystem** — Layered container images
 
+<br/>
+<v-click>
+<OrangeText>Android's kernel lacks these</OrangeText>
+</v-click>
+
 <!--
 "Kubernetes needs four kernel features.
 
@@ -520,8 +463,7 @@ Kubernetes runs in Debian. Debian runs on Android. Simple."
 
 # Android Is Linux (But We Need Debian)
 
-1. Android OS runs on Linux kernel
-2. Use Linux Terminal App
+1. Use Linux Terminal App
 3. Create emulated Debian environment
 4. Install k3s inside Debian
 5. Run your containers
@@ -596,7 +538,8 @@ And you're done. You have a real Linux terminal on your phone."
 ---
 layout: statement
 ---
-# Let's take a look
+
+# Let's take a <BlueText>deeper</BlueText> look
 
 ---
 
@@ -604,14 +547,11 @@ layout: statement
 
 # Linux Terminal App Performance
 
-
-Even the "fast" option has limitations:
-
-<v-clicks>
-
 - **PassMark Multithread CPU**: 3629 (vs 8041 native)
 - **Memory Access**: Only 2GB (vs 12GB total)
 - **Reason**: VM overhead and resource isolation
+
+<v-clicks>
 
 <div class="text-orange-400 font-bold text-2xl mt-8">
 Still 1.5x faster than the 2010 server! (2443)
@@ -1058,8 +998,7 @@ backgroundSize: 90%
 
 Without Services:
 - Pod dies → IP changes → app breaks
-- You'd need to track every Pod's IP
-- No load balancing
+- You'd need to track every pod's IP
 
 <div v-click>
 <div class="text-orange-400 font-bold mt-4">
@@ -1297,7 +1236,7 @@ This creates a **single-node cluster** with:
 - Simple token `abc` for joining nodes
 
 <div class="text-sm text-orange-400 mt-4">
-<strong>Note:</strong> Simple tokens like "abc" are ONLY acceptable in a VPN. Never in production!
+<strong>Note:</strong> Simple tokens like "abc" are only acceptable in a VPN. Never in production!
 </div>
 
 The service auto-restarts on reboot or crash.
@@ -1442,22 +1381,6 @@ Deploy and wait till running.
 
 <PhoneTwoColumnZoom img="./img/curl.png">
 
-# Test the Service
-
-<CodeWithScript scriptPath="./echo-demo/scripts/04-curl.sh">
-```bash
-curl http://localhost:30080?echo_code=402
-```
-</CodeWithScript>
-
-The service responds with details about which pod handled the request.
-
-</PhoneTwoColumnZoom>
-
----
-
-<PhoneTwoColumnZoom img="./img/curl.png">
-
 # Test the Load Balancing
 
 <CodeWithScript scriptPath="./echo-demo/scripts/04b-curl-hostname.sh">
@@ -1484,7 +1407,7 @@ kubectl scale deployment echo --replicas=3
 
 <br/>
 <v-switch>
-<template #2>
+<template #1>
 <RedText>Alternative</RedText>: You could also modify the YAML and redeploy:
 
 ```yaml
@@ -1497,8 +1420,8 @@ Then run
 kubectl apply -f echo-demo/manifests/echo.yaml
 ```
 </template>
-<template #3-4>
-<span v-mark="{at: 2, color: 'orange'}">Scaling is instant.</span> Kubernetes automatically schedules the new pod.
+<template #2-3>
+<span v-mark="{color: 'orange'}">Scaling is instant.</span> Kubernetes automatically schedules the new pod.
 </template>
 </v-switch>
 </PhoneTwoColumnZoom>
@@ -1543,7 +1466,7 @@ This removes everything:
 layout: statement
 ---
 
-# So, yes: <RedText>Phones</RedText> can run <BlueText>Kubernetes</BlueText>.
+# So, <OrangeText>yes</OrangeText>: <RedText>Phones</RedText> can run <BlueText>Kubernetes</BlueText>.
 
 ---
 
@@ -1608,9 +1531,9 @@ Now go build something impossible
   <div>
     <div class="text-lg font-bold mb-3">Blog</div>
     <img
-      :src="qrMostly"
+      src="./img/qr-mostlynerdless.png"
       alt="QR code for mostlynerdless.de"
-      class="mx-auto rounded-lg"
+      class="mx-auto "
       style="width: 50%"
     />
     <div class="mt-3 text-sm text-gray-500">
@@ -1620,9 +1543,9 @@ Now go build something impossible
   <div>
     <div class="text-lg font-bold mb-3">Project</div>
     <img
-      :src="qrGithub"
+      src="./img/qr-k3s-github.png"
       alt="QR code for k3s-on-phone-demo GitHub repo"
-      class="mx-auto rounded-lg"
+      class="mx-auto"
       style="width: 50%"
     />
     <div class="mt-3 text-sm text-gray-500">
@@ -1632,9 +1555,9 @@ Now go build something impossible
   <div>
     <div class="text-lg font-bold mb-3">SapMachine</div>
     <img
-      :src="qrSap"
+      src="./img/qr-sapmachine.png"
       alt="QR code for sapmachine.io"
-      class="mx-auto rounded-lg"
+      class="mx-auto"
       style="width: 50%"
     />
     <div class="mt-3 text-sm text-gray-500">
