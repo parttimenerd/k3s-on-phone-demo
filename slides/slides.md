@@ -69,7 +69,7 @@ layout: center
 # This Is Not a Joke
 
 ```sh
-$ kubectl get nodes
+kubectl get nodes
 NAME      STATUS   ROLES           AGE
 phone-a   Ready    control-plane   30m
 phone-b   Ready    <none>          10m
@@ -118,12 +118,15 @@ you understand Kubernetes."
 -->
 
 ---
+layout: statement
+---
 
-# Why Should You Care?
+# Why Should You <OrangeText>Care</OrangeText>?
 
-<div class="text-6xl font-bold text-center mt-12">
-Kubernetes feels like magic
-</div>
+---
+layout: statement
+---
+# Kubernetes feels like <RedText>magic</RedText>
 
 <!--
 Build the case for why this matters.
@@ -134,12 +137,10 @@ Pause. Let that sink in.
 -->
 
 ---
+layout: statement
+---
 
-# Why Should You Care?
-
-<div class="text-6xl font-bold text-center mt-12">
-Magic is intimidating
-</div>
+# <RedText>Magic</RedText> is <BlueText>intimidating</BlueText>
 
 <!--
 "And magic is intimidating.
@@ -192,7 +193,7 @@ It makes Kubernetes real."
 layout: statement
 ---
 
-# Let's have some fun, 
+# Let's have some <BlueText>fun</BlueText>,
 # shall we?
 
 <!--
@@ -320,7 +321,7 @@ Pause for laughs.
 layout: statement
 ---
 
-# They are the perfect 
+# They are the perfect
 # <span style="color: rgb(93, 60, 251)">IOT</span> device.
 
 ---
@@ -641,7 +642,7 @@ Even with these limitations, it's STILL faster than that 2010 production server.
 
 This is a phone running a VM, and it beats a data center machine from 2010.
 
-Now, is it as fast as a modern laptop? No. 
+Now, is it as fast as a modern laptop? No.
 My Mac M4 Pro scores over 32,000 on PassMark multithread.
 That's 9 times faster than the phone.
 
@@ -944,35 +945,35 @@ A stable network address for Pods
       <polygon points="0 0, 10 3, 0 6" fill="#666" />
     </marker>
   </defs>
-  
+
   <!-- Internet Cloud -->
   <g>
     <text x="47" y="240" text-anchor="middle" fill="#6366f1" font-size="30" font-weight="bold">☁️</text>
   </g>
-  
+
   <!-- Arrow to Service -->
   <path d="M 100 200 L 210 200" stroke="#999" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
-  
+
   <!-- Service -->
   <rect x="210" y="130" width="170" height="140" fill="#f97316" stroke="#c2410c" stroke-width="2" rx="10"/>
   <text x="295" y="175" text-anchor="middle" fill="white" font-size="11" font-weight="bold">Service</text>
   <text x="295" y="220" text-anchor="middle" fill="white" font-size="8">10.0.0.1:80</text>
-  
+
   <!-- Arrows to Pods -->
   <path d="M 380 155 L 470 95" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5" opacity="0.6"/>
   <path d="M 380 200 L 500 200" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5" opacity="0.6"/>
   <path d="M 380 245 L 470 305" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5" opacity="0.6"/>
-  
+
   <!-- Pods (much bigger) -->
   <rect x="470" y="40" width="150" height="70" fill="#8b5cf6" stroke="#6d28d9" stroke-width="2" rx="8"/>
   <text x="545" y="90" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Pod 1</text>
-  
+
   <rect x="500" y="165" width="150" height="70" fill="#8b5cf6" stroke="#6d28d9" stroke-width="2" rx="8"/>
   <text x="575" y="220" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Pod 2</text>
-  
+
   <rect x="470" y="290" width="150" height="70" fill="#8b5cf6" stroke="#6d28d9" stroke-width="2" rx="8"/>
   <text x="545" y="345" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Pod 3</text>
-  
+
   <!-- Animated packets on curved paths -->
   <!-- Packet 1 → Pod 2 -->
   <g>
@@ -981,7 +982,7 @@ A stable network address for Pods
     </animateMotion>
     <circle r="7" class="packet"/>
   </g>
-  
+
   <!-- Packet 2 → Pod 1 -->
   <g>
     <animateMotion dur="2.5s" repeatCount="indefinite" begin="0.4s">
@@ -989,7 +990,7 @@ A stable network address for Pods
     </animateMotion>
     <circle r="7" class="packet"/>
   </g>
-  
+
   <!-- Packet 3 → Pod 3 -->
   <g>
     <animateMotion dur="2.5s" repeatCount="indefinite" begin="0.8s">
@@ -997,7 +998,7 @@ A stable network address for Pods
     </animateMotion>
     <circle r="7" class="packet"/>
   </g>
-  
+
   <!-- Packet 4 → Pod 1 -->
   <g>
     <animateMotion dur="2.5s" repeatCount="indefinite" begin="1.2s">
@@ -1005,7 +1006,7 @@ A stable network address for Pods
     </animateMotion>
     <circle r="7" class="packet"/>
   </g>
-  
+
   <!-- Packet 5 → Pod 2 -->
   <g>
     <animateMotion dur="2.5s" repeatCount="indefinite" begin="1.6s">
@@ -1013,7 +1014,7 @@ A stable network address for Pods
     </animateMotion>
     <circle r="7" class="packet"/>
   </g>
-  
+
   <!-- Packet 6 → Pod 3 -->
   <g>
     <animateMotion dur="2.5s" repeatCount="indefinite" begin="2s">
@@ -1021,7 +1022,7 @@ A stable network address for Pods
     </animateMotion>
     <circle r="7" class="packet"/>
   </g>
-  
+
   <!-- Invisible paths for motion -->
   <path id="path-to-pod1-1" d="M 100 200 Q 360 140 545 75" fill="none"/>
   <path id="path-to-pod2-1" d="M 100 200 L 500 200" fill="none"/>
@@ -1096,7 +1097,7 @@ Decides which Node gets which Pod
 
 Scheduler looks at:
 - Which nodes have capacity?
-- Which nodes match constraints? 
+- Which nodes match constraints?
   - memory
   - CPU
   - labels
@@ -1168,7 +1169,7 @@ layout: section
 ---
 
 <div class="text-6xl font-bold text-center mt-8 text-orange-400">
-Thats everything you need
+That's everything you need
 </div>
 
 <v-clicks>
@@ -1203,7 +1204,7 @@ layout: statement
 layout: section
 ---
 
-# Part 4: A tiny k3s cluster 
+# Part 4: A tiny k3s cluster
 # in your pocket
 
 ---
@@ -1243,7 +1244,7 @@ graph TB
     Service["Service<br/>echo-service"]
     Pod1["Pod 1<br/>Echo Server"]
     Pod2["Pod 2<br/>Echo Server"]
-    
+
     Client -->|Load Balance| Service
     Service -->|Traffic| Pod1
     Service -->|Traffic| Pod2
@@ -1423,7 +1424,7 @@ spec:
 
 ```bash{all|1}
 kubectl apply -f echo-demo/manifests/echo.yaml
-kubectl wait --for=condition=ready \ 
+kubectl wait --for=condition=ready \
   pod -l app=echo \
   --timeout=60s
 kubectl get pods -o wide

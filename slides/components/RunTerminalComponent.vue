@@ -389,7 +389,7 @@ function close() {
 
 function handleKeydown(event) {
   // Global keyboard shortcuts
-  if (event.key === 't' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+  if (event.key.toLowerCase() === 't' && event.ctrlKey && !event.metaKey && !event.altKey) {
     // Don't trigger if typing in an input
     if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
       return
