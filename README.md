@@ -69,9 +69,6 @@ The launcher will automatically install dependencies and start both the terminal
 - [Kubernetes Concepts Used](#kubernetes-concepts-used)
 - [Additional Useful References](#additional-useful-references)
 - [Final Thought](#final-thought)
-  - [TODO](#todo)
-    - [Completed ✅](#completed-)
-    - [Remaining](#remaining)
 
 ---
 
@@ -216,27 +213,4 @@ Tailscale:
 
 > The cloud is just someone else’s computer.
 > This is Kubernetes on someone else’s phone.
-
----
-
-## TODO
-
-### Completed ✅
-
-- **Interactive Terminal Feature (xterm.js)**
-  - Backend terminal server in `slides/terminal-server/`
-  - Frontend modal terminal with xterm.js
-  - Run buttons in `CodeWithScript` + `t` shortcut
-  - Script execution restricted to demo paths
-- **GitHub Actions CI**
-  - Slidev build workflow in `.github/workflows/slidev-build.yml`
-
-### Remaining
-
-- Try to run the presentation on a phone
-
-
-
-
-
 
