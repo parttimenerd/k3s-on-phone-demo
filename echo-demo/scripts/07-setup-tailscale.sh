@@ -42,6 +42,8 @@ AUTH_KEY=$(cat "$KEY_PATH")
 echo "Step 1: Install Tailscale"
 curl -fsSL https://tailscale.com/install.sh | sh
 
+sudo dpkg --configure -a
+
 echo ""
 echo "Step 2: Connect to Tailscale network"
 sudo tailscale up --auth-key "$AUTH_KEY" --hostname "$HOSTNAME"
