@@ -15,22 +15,32 @@ echo "- Tailscale is running on both phones"
 echo "- Control plane phone has k3s server installed"
 echo ""
 
-echo "Step 1: Connecting to control plane at '$CONTROL_PLANE_HOSTNAME'"
+echo "Step 1: Cleaning up any previous k3s agent installation..."
+sudo systemctl stop k3s-agent > /dev/null 2>&1 || true
+if [ -x "/usr/local/bin/k3s-agent-uninstall.sh" ]; then
+  sudo /usr/local/bin/k3s-agent-uninstall.sh || true
+fi
+sudo rm -rf /var/lib/rancher/k3s /etc/rancher/k3s /var/lib/kubelet /opt/cni 2>/dev/null || true
+
+echo "Step 2: Connecting to control plane at '$CONTROL_PLANE_HOSTNAME'"
 
 echo ""
-echo "Step 2: Using pre-configured token 'abc'"
+echo "Step 3: Using pre-configured token 'abc'"
 echo "NOTE: This simple token is ONLY acceptable in a VPN."
 echo "      Never use simple tokens in production!"
 K3S_TOKEN="abc"
 
 echo ""
-echo "Step 3: Installing k3s agent on this phone..."
+echo "Step 4: Installing k3s agent on this phone..."
 echo "Node name: $NODE_NAME"
 echo "This will join the cluster as a worker node."
 echo ""
 
 curl -sfL https://get.k3s.io | K3S_URL=https://$CONTROL_PLANE_HOSTNAME:6443 K3S_TOKEN=$K3S_TOKEN K3S_NODE_NAME=$NODE_NAME K3S_CLUSTER_CIDR=10.42.0.0/16 sh -
 
+echo ""
+echo "Waiting for node to be ready..."
+sleep 5
 echo ""
 echo "Join complete! Verify on control plane with:"
 echo "  kubectl get nodes"
