@@ -7,11 +7,11 @@ cd "$(dirname "$0")/.."
 NODE_NAME="${1:-}"
 
 if [ -z "$NODE_NAME" ]; then
-  NODE_NAME=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')
+  NODE_NAME=$(sudo kubectl get nodes -o jsonpath='{.items[0].metadata.name}')
 fi
 
 # Get the node's internal IP (works across Tailscale VPN)
-NODE_IP=$(kubectl get node "$NODE_NAME" -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')
+NODE_IP=$(sudo kubectl get node "$NODE_NAME" -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')
 
 if [ -z "$NODE_IP" ]; then
   echo "Error: Could not get IP for node $NODE_NAME"
