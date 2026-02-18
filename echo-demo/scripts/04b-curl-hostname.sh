@@ -7,6 +7,7 @@ cd "$(dirname "$0")/.."
 PORT_FORWARD_PID=""
 
 cleanup() {
+  echo "Cleaning up..."
   if [ -n "$PORT_FORWARD_PID" ]; then
     kill $PORT_FORWARD_PID 2>/dev/null || true
   fi
