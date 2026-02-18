@@ -3,7 +3,6 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-trap cleanup EXIT
 
 echo "Setting up port-forward to echo service..."
 kubectl port-forward svc/echo 8080:80 &
