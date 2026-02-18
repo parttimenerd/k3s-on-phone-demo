@@ -3,21 +3,28 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-# Get the service's ClusterIP for cross-node load balancing
-CLUSTER_IP=$(kubectl get svc echo -o jsonpath='{.spec.clusterIP}' 2>/dev/null || echo "")
+# Set up port-forward to the service for load balancing
+PORT_FORWARD_PID=""
 
-if [ -z "$CLUSTER_IP" ]; then
-  echo "Error: Could not get service ClusterIP"
-  exit 1
-fi
+cleanup() {
+  if [ -n "$PORT_FORWARD_PID" ]; then
+    kill $PORT_FORWARD_PID 2>/dev/null || true
+  fi
+}
 
-echo "Querying echo service at $CLUSTER_IP to see which node handles the request..."
+trap cleanup EXIT
+
+echo "Setting up port-forward to echo service..."
+kubectl port-forward svc/echo 8080:80 > /dev/null 2>&1 &
+PORT_FORWARD_PID=$!
+sleep 1
+
+echo "Querying echo service at localhost:8080 to see which node handles the request..."
 echo ""
 
 for i in {1..5}; do
   echo "Request $i:"
-  kubectl run -it --rm curl-test-$$ --image=curlimages/curl --restart=Never -- \
-    curl -s "http://$CLUSTER_IP?echo_env_body=NODE_NAME" || true
+  curl -s "http://localhost:8080?echo_env_body=NODE_NAME"
   echo ""
   sleep 1
 done
