@@ -36,7 +36,8 @@ echo "Node name: $NODE_NAME"
 echo "This will join the cluster as a worker node."
 echo ""
 
-curl -sfL https://get.k3s.io | K3S_URL=https://$CONTROL_PLANE_HOSTNAME:6443 K3S_TOKEN=$K3S_TOKEN K3S_NODE_NAME=$NODE_NAME K3S_CLUSTER_CIDR=10.42.0.0/16 sh -
+curl -sfL https://get.k3s.io | K3S_URL=https://$CONTROL_PLANE_HOSTNAME:6443 K3S_TOKEN=$K3S_TOKEN K3S_NODE_NAME=$NODE_NAME K3S_CLUSTER_CIDR=10.42.0.0/16 \
+  INSTALL_K3S_EXEC="--flannel-iface=tailscale0" sh -
 
 echo ""
 echo "Waiting for node to be ready..."

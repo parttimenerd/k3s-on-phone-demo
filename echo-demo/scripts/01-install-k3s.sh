@@ -25,9 +25,11 @@ echo "Removing k3s data and configuration..."
 sudo rm -rf /var/lib/rancher/k3s /etc/rancher/k3s /var/lib/kubelet /opt/cni 2>/dev/null || true
 
 echo ""
-echo "Installing fresh k3s with Flannel and cluster CIDR..."
+echo "Installing fresh k3s with Flannel (using Tailscale interface)..."
 echo "NOTE: Using a simple token is ONLY acceptable because we're in a VPN."
 echo "      In production, NEVER use simple tokens like this!"
 echo ""
 
-curl -sfL https://get.k3s.io | K3S_TOKEN=abc K3S_CLUSTER_CIDR=10.42.0.0/16 sh -
+# Install k3s with Flannel configured for Tailscale
+curl -sfL https://get.k3s.io | K3S_TOKEN=abc K3S_CLUSTER_CIDR=10.42.0.0/16 \
+  INSTALL_K3S_EXEC="--flannel-iface=tailscale0" sh -
