@@ -419,22 +419,22 @@ Watch as it schedules pods across both phones."
 
 ---
 
-# Cross-Node Load Balancing
-
 <PhoneTwoColumnZoom
-  :img="['./img/echo-demo/curl_nodename_1.png', './img/echo-demo/curl_nodename_2.png', './img/echo-demo/curl_nodename_3.png']"
+  img="./img/mn/curl.png"
   :zoom="2"
-  :offsetY="-50"
+  :offsetY="-30"
   :clickToReveal="false"
 >
 
-<CodeWithScript scriptPath="./echo-demo/scripts/04b-curl-hostname.sh">
+# Cross-Node Load Balancing
+
+
+<CodeWithScript scriptPath="./echo-demo/scripts/04c-curl-nodename.sh">
 ```bash
-curl http://127.0.0.1:30080?echo_env_body=HOSTNAME
+curl http://127.0.0.1:30080?echo_env_body=NODE_NAME
 ```
 </CodeWithScript>
 
-Makes multiple requests, showing the NODE_NAME in the response.
 
 Notice how traffic is distributed across **different physical devices**.
 
@@ -457,13 +457,14 @@ This is real distributed computing."
 
 ---
 
-# Remove Phone B from Cluster
-
 <PhoneTwoColumnZoom
   img="./img/echo-demo/undeploy2.png"
   :zoom="1"
   :offsetY="-30"
 >
+
+# Remove Second Phone from Cluster
+
 
 <CodeWithScript scriptPath="./echo-demo/scripts/09-delete-phone-b.sh">
 ```bash
