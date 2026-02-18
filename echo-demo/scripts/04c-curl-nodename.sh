@@ -3,28 +3,30 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-# Set up port-forward to the service for load balancing
-PORT_FORWARD_PID=""
+# Get a node name to query (defaults to first node)
+NODE_NAME="${1:-}"
 
-cleanup() {
-  if [ -n "$PORT_FORWARD_PID" ]; then
-    kill $PORT_FORWARD_PID 2>/dev/null || true
-  fi
-}
+if [ -z "$NODE_NAME" ]; then
+  NODE_NAME=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}')
+fi
 
-trap cleanup EXIT
+# Get the node's internal IP (works across Tailscale VPN)
+NODE_IP=$(kubectl get node "$NODE_NAME" -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')
 
-echo "Setting up port-forward to echo service..."
-kubectl port-forward svc/echo 8080:80 > /dev/null 2>&1 &
-PORT_FORWARD_PID=$!
-sleep 1
+if [ -z "$NODE_IP" ]; then
+  echo "Error: Could not get IP for node $NODE_NAME"
+  exit 1
+fi
 
-echo "Querying echo service at localhost:8080 to see which node handles the request..."
+# Use nodePort (30080) which load balances across all pods
+SERVICE_ADDR="$NODE_IP:30080"
+
+echo "Querying echo service at $SERVICE_ADDR (node: $NODE_NAME) to see which node handles the request..."
 echo ""
 
 for i in {1..5}; do
   echo "Request $i:"
-  curl -s "http://localhost:8080?echo_env_body=NODE_NAME"
+  curl -s "http://$SERVICE_ADDR?echo_env_body=NODE_NAME"
   echo ""
   sleep 1
 done
