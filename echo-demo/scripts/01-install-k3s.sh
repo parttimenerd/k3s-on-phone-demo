@@ -31,8 +31,3 @@ echo "      In production, NEVER use simple tokens like this!"
 echo ""
 
 curl -sfL https://get.k3s.io | K3S_TOKEN=abc K3S_CLUSTER_CIDR=10.42.0.0/16 sh -
-
-echo ""
-echo "Waiting for Flannel to come up..."
-sleep 5
-kubectl wait -n kube-system --for=condition=ready pod -l app=flannel --timeout=120s || echo "Flannel pods not ready yet"
