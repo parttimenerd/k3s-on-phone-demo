@@ -12,5 +12,3 @@ for i in {1..5}; do
   echo ""
   sleep 1
 done
-  sleep 1
-done

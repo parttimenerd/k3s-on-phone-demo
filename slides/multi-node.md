@@ -221,60 +221,124 @@ Installs Tailscale and connects with hostname `phone-b`.
 
 
 ---
+layout: image
+image: "./img/phone_in_closet.jpg"
+---
+
+
+---
 
 <PhoneTwoColumnZoom
-  img="./img/mn/tailscale-join.png"
+  img="./img/mn/join-cluster.png"
   :zoom="1"
-  :offsetY="-40"
+  :offsetY="-401"
   :clickToReveal="true"
 >
 
 # Join Second Phone to Cluster
 
-```bash
+```bash{1|3-|3|4|5|6|7|all}
 ./echo-demo/scripts/08-join-cluster.sh
 # Essentially:
 curl -sfL https://get.k3s.io | \
   K3S_URL=https://$CONTROL_PLANE_HOSTNAME:6443 \
   K3S_TOKEN=$K3S_TOKEN K3S_NODE_NAME=$NODE_NAME \
   K3S_CLUSTER_CIDR=10.42.0.0/16 \
+  INSTALL_K3S_EXEC="--flannel-iface=tailscale0" \
   sh -
-
 ```
 
-This script:
-1. Sets up Tailscale on phone-b
-2. Connects to control plane at hostname `phone-a`
-3. Uses pre-configured token `abc`
-4. Installs k3s in agent mode
-5. Joins the cluster
+<v-clicks>
+
+*These settings also need to be on the control plane.*
 
 <div class="text-sm text-orange-400 mt-4">
 <strong>Security:</strong> Simple token is safe here because we're in a VPN.
 </div>
-
-
-<!--
-"The join script is simple but powerful. It defaults to phone-a as the control plane and phone-b as the node name.
-
-The critical part is K3S_CLUSTER_CIDR=10.42.0.0/16. Without it, the second node's pods get a completely different IP range, and they can't reach pods on the first node. With it, both nodes allocate sub-ranges from the same /16, so Flannel can route between them.
-
-Flannel is k3s's networking plugin - think of it as a postal service for pods across nodes. Each node gets a unique pod subnet like 10.42.0.0/24 and 10.42.1.0/24. Flannel adds routes so packets destined for a remote pod CIDR get tunneled through the physical network - in this case, through Tailscale. Without Flannel coordinating those routes, pods on different nodes would be completely isolated.
-
-We use a simple token 'abc' which is only acceptable because we're in a private VPN. In production, you'd use the secure auto-generated token from k3s.
-
-This takes about a minute or two. While we wait, just know that behind the scenes, k3s is registering the new node, distributing certificates, and setting up all the networking plumbing."
--->
-
+</v-clicks>
 
 </PhoneTwoColumnZoom>
 
----
-layout: image
-image: "./img/phone_in_closet.jpg"
+<!--
+Three critical settings:
+- `K3S_CLUSTER_CIDR=10.42.0.0/16` — pod address space
+- `--flannel-iface=tailscale0` — use Tailscale for tunneling
+- `K3S_NODE_NAME=phone-b` — node identity
+-->
+
 ---
 
+# Why These Settings Matter
 
+<div class="grid grid-cols-2 gap-6">
+
+<div>
+
+**`K3S_CLUSTER_CIDR=10.42.0.0/16`**
+
+Without it:
+- phone-a pods: `10.42.0.0/24`
+- phone-b pods: `10.42.3.0/24` ❌
+
+With it:
+- Both use ranges from same `/16`
+- Flannel can route between them ✓
+
+</div>
+
+<div>
+
+**`--flannel-iface=tailscale0`**
+
+Without it:
+- Flannel uses WiFi/cellular
+- Wrong interface for VPN ❌
+
+With it:
+- Flannel tunnels through VPN
+- Pods talk via Tailscale ✓
+
+</div>
+
+</div>
+
+<div class="mt-8 text-center">
+
+```mermaid
+graph LR
+  A["Pod A<br/>10.42.0.10<br/>phone-a"] -->|packet| F["Flannel<br/>encapsulate"]
+  F -->|VXLAN| T["Tailscale<br/>tunnel"]
+  T -->|over VPN| B["Phone-b"]
+  B -->|receives| D["Flannel<br/>decapsulate"]
+  D -->|local delivery| C["Pod B<br/>10.42.1.10<br/>phone-b"]
+```
+
+</div>
+
+<!--
+"Let me explain what's actually happening here.
+
+**What is Flannel?**
+Flannel is k3s's Container Network Interface plugin - think of it as the postal service for pods across nodes. It creates an overlay network using VXLAN, which is basically encapsulation.
+
+When a pod on phone-a wants to talk to a pod on phone-b, Flannel takes that packet and wraps it up - encapsulates it - so it can be sent over the physical network. The catch is: Flannel needs to know which physical node to send it to.
+
+**Why K3S_CLUSTER_CIDR matters:**
+Without it, each node independently assigns pod IP ranges. Phone-a might use 10.42.0.0/24 and phone-b gets 10.42.3.0/24 - completely different ranges with no coordination. Flannel can't build routes because it doesn't know which pod CIDRs belong to which node.
+
+With K3S_CLUSTER_CIDR=10.42.0.0/16, we're telling both nodes: 'allocate your pod IPs from this /16 range.' Phone-a gets 10.42.0.0/24 as its sub-range, phone-b gets 10.42.1.0/24. Now Flannel knows: anything in 10.42.1.0/24 goes to phone-b.
+
+**Why --flannel-iface=tailscale0 matters:**
+Here's the subtle part: Flannel knows it needs to send packets to phone-b. But how? Over which interface? On a normal Kubernetes cluster, all nodes are on the same physical network - Flannel just sends the encapsulated packet on the main network interface.
+
+But our nodes are on different phones. They might be on different WiFi networks, or cellular. The only connection between them is the Tailscale VPN tunnel - the tailscale0 interface.
+
+Without --flannel-iface=tailscale0, Flannel auto-detects and tries to use eth0 or wlan0 - the WiFi or cellular interface. But phone-b isn't reachable there! The packet gets lost.
+
+With --flannel-iface=tailscale0, we're telling Flannel: 'Use the Tailscale interface to tunnel encapsulated packets to remote nodes.' Now the VXLAN traffic goes through the VPN, and both phones can reach each other.
+
+That's the magic of this setup: Flannel + Tailscale. Flannel handles the pod networking, Tailscale handles the VPN. Together, they give you a real Kubernetes cluster across phones."
+-->
 
 ---
 
