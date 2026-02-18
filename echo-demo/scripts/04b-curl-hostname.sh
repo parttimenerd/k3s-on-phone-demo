@@ -23,9 +23,8 @@ sleep 1
 echo "Querying echo service at localhost:8080 to see which pod handles the request..."
 echo ""
 
-for i in {1..5}; do
+for i in {1..500}; do
   echo "Request $i:"
   curl -s "http://localhost:8080?echo_env_body=HOSTNAME"
   echo ""
-  sleep 1
 done
