@@ -458,9 +458,9 @@ This is real distributed computing."
 ---
 
 <PhoneTwoColumnZoom
-  img="./img/echo-demo/undeploy2.png"
+  img="./img/mn/delete.png"
   :zoom="1"
-  :offsetY="-30"
+  :offsetY="-25"
 >
 
 # Remove Second Phone from Cluster
@@ -499,13 +499,13 @@ Now we're back to a single-node cluster, just like we started."
 
 ---
 
-# Cleanup: Undeploy
-
 <PhoneTwoColumnZoom
-  img="./img/echo-demo/undeploy.png"
+  img="./img/mn/undeploy.png"
   :zoom="1"
-  :offsetY="-30"
+  :offsetY="-25"
 >
+
+# Cleanup: Undeploy
 
 <CodeWithScript scriptPath="./echo-demo/scripts/06-undeploy-echo.sh">
 ```bash
@@ -534,7 +534,7 @@ But the echo pods are gone."
 layout: statement
 ---
 
-# So, yes, you can build a
+# So, <RedText>yes</RedText>, you can build a
 # <OrangeText>Kubernetes</OrangeText> <BlueText>cluster</BlueText>
 # from <RedText>phones</RedText>
 
