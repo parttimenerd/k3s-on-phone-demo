@@ -122,7 +122,7 @@ It's faster, more repeatable, and fits the theme."
 
 ---
 
-<CroppedImage src="./img/mn/tailscale-token-generation.png" alt="Tailscale Token Generation" />
+<CroppedImage src="./img/mn/tailscale-token-gen.png" alt="Tailscale Token Generation" />
 
 --- 
 
@@ -131,14 +131,14 @@ It's faster, more repeatable, and fits the theme."
 
 ---
 
-# Setup Tailscale
-
 <PhoneTwoColumnZoom
-  img="./img/echo-demo/setup_tailscale.png"
+  img="./img/mn/setup_tailscale.png"
   :zoom="1"
-  :offsetY="-30"
+  :offsetY="-387"
   :clickToReveal="true"
 >
+
+# Setup Tailscale
 
 Prerequisites:
 - Create `.tailscale-key` file with your Tailscale auth key
@@ -148,6 +148,9 @@ Prerequisites:
 <CodeWithScript scriptPath="./echo-demo/scripts/07-setup-tailscale.sh">
 ```bash
 ./echo-demo/scripts/07-setup-tailscale.sh phone-a
+# Essentially:
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up --auth-key "$AUTH_KEY" --hostname "$HOSTNAME"
 ```
 </CodeWithScript>
 
@@ -176,13 +179,31 @@ layout: statement
 
 ---
 
-# Setup Tailscale on Second Phone
 
 <PhoneTwoColumnZoom
-  img="./img/echo-demo/setup_tailscale2.png"
+  img="./img/mn/setup-tailscale2.png"
   :zoom="1"
-  :offsetY="-30"
+  :offsetY="-400"
 >
+
+# Setup Tailscale
+
+1. Pull the GitHub repo on the second phone
+
+```bash
+sudo apt update; sudo apt install git curl
+git clone https://github.com/parttimenerd/k3s-on-phone-demo
+cd k3s-on-phone-demo
+```
+<v-click>
+
+2. Create `.tailscale-key` file <br/>
+
+</v-click>
+
+<v-click>
+
+3. Run the setup script with a different hostname:
 
 ```bash
 ./echo-demo/scripts/07-setup-tailscale.sh phone-b
@@ -190,22 +211,33 @@ layout: statement
 
 Installs Tailscale and connects with hostname `phone-b`.
 
+</v-click>
+
 </PhoneTwoColumnZoom>
 
+---
+
+<CroppedImage src="./img/mn/tailscale-machines.png" alt="Tailscale Machines" />
 
 
 ---
 
-# Join Second Phone to Cluster
-
 <PhoneTwoColumnZoom
-  img="./img/echo-demo/join_cluster.png"
+  img="./img/mn/tailscale-join.png"
   :zoom="1"
-  :offsetY="-30"
+  :offsetY="-40"
+  :clickToReveal="true"
 >
+
+# Join Second Phone to Cluster
 
 ```bash
 ./echo-demo/scripts/08-join-cluster.sh phone-a
+# Essentially:
+curl -sfL https://get.k3s.io | \
+  K3S_URL=https://$CONTROL_PLANE_HOSTNAME:6443 \
+  K3S_TOKEN=$K3S_TOKEN \
+  sh -
 ```
 
 This script:
@@ -219,7 +251,6 @@ This script:
 <strong>Security:</strong> Simple token is safe here because we're in a VPN.
 </div>
 
-</PhoneTwoColumnZoom>
 
 <!--
 "Now we run the join script on the second phone.
@@ -239,15 +270,26 @@ The script then installs k3s in agent mode and joins the cluster."
 Pause. "This takes a minute or two."
 -->
 
+</PhoneTwoColumnZoom>
+
+---
+layout: image
+image: "./img/phone_in_closet.jpg"
 ---
 
-# Verify Multi-Node Cluster
+
+
+---
+
+
 
 <PhoneTwoColumnZoom
-  img="./img/echo-demo/verify_multi_node.png"
+  img="./img/mn/verify-cluster.png"
   :zoom="1"
   :offsetY="-30"
 >
+
+# Verify Multi-Node Cluster
 
 <CodeWithScript scriptPath="./echo-demo/scripts/02-verify-cluster.sh">
 ```bash
@@ -256,6 +298,8 @@ kubectl get nodes
 </CodeWithScript>
 
 Shows all nodes in the cluster with their status.
+
+*We could have named our nodes, but well...*
 
 </PhoneTwoColumnZoom>
 
@@ -270,18 +314,35 @@ Point at the screen. "This is a real multi-node Kubernetes cluster."
 
 ---
 
-# Deploy Echo Server
+<CroppedImage src="./img/mn/tailscale-dns.png" alt="Tailscale DNS" />
+
+<!--
+You might need to change the DNS, so that the docker registry can be resolved. 
+Tailscale provides MagicDNS for this purpose, but it seems to fail.
+-->
+---
+
+
 
 <PhoneTwoColumnZoom
-  img="./img/echo-demo/deploy_multi_node.png"
+  img="./img/mn/deploy_multi_node.png"
   :zoom="1"
   :offsetY="-30"
   :clickToReveal="true"
 >
 
-```bash
-./echo-demo/scripts/03-deploy-echo.sh
+# Deploy Echo Server
+
+<CodeWithScript scriptPath="./echo-demo/scripts/03-deploy-echo.sh">
+
+```bash{all|1}
+kubectl apply -f echo-demo/manifests/echo.yaml
+kubectl wait --for=condition=ready \
+  pod -l app=echo \
+  --timeout=60s
+kubectl get pods -o wide
 ```
+</CodeWithScript>
 
 Same deployment, but now Kubernetes can schedule pods on **both phones**.
 
@@ -308,13 +369,15 @@ Watch as it schedules pods across both phones."
 
 <CodeWithScript scriptPath="./echo-demo/scripts/04b-curl-hostname.sh">
 ```bash
-curl http://127.0.0.1:30080?echo_env_body=HOSTNAME
+./echo-demo/scripts/04b-curl-hostname.sh
 ```
 </CodeWithScript>
 
-Makes multiple requests, showing the NODE_NAME in the response.
+Makes multiple requests to the LoadBalancer service's external IP.
 
 Notice how traffic is distributed across **different physical devices**.
+
+The script automatically discovers the service's external IP—no manual configuration needed.
 
 </PhoneTwoColumnZoom>
 

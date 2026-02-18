@@ -4,7 +4,7 @@
       <slot></slot>
     </div>
     
-    <div style="margin: -10px 20px 20px 0; position: relative; height: 100%; width: 220%;">
+    <div style="margin: 0px 20px 20px 0; position: relative; height: 100%; width: 220%;">
       <!-- First image shown immediately with zoom -->
       <div v-if="clickToReveal == true">
         <v-click>
