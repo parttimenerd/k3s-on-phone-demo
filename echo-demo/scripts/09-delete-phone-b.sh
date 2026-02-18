@@ -10,11 +10,11 @@ echo ""
 NODE_NAME="phone-b"
 
 echo "Draining node '$NODE_NAME'..."
-kubectl drain "$NODE_NAME" --ignore-daemonsets --delete-emptydir-data --force || true
+sudo kubectl drain "$NODE_NAME" --ignore-daemonsets --delete-emptydir-data --force || true
 
 echo ""
 echo "Deleting node '$NODE_NAME'..."
-kubectl delete node "$NODE_NAME" || true
+sudo kubectl delete node "$NODE_NAME" || true
 
 echo ""
 echo "Node '$NODE_NAME' has been removed from the cluster."
