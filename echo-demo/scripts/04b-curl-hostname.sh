@@ -3,10 +3,21 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+# Set up port-forward to the service for load balancing
+PORT_FORWARD_PID=""
+
+cleanup() {
+  echo "Cleaning up..."
+  if [ -n "$PORT_FORWARD_PID" ]; then
+    kill $PORT_FORWARD_PID 2>/dev/null || true
+  fi
+}
+
+trap cleanup EXIT
 
 echo "Setting up port-forward to echo service..."
-kubectl port-forward svc/echo 8080:80 &
-
+sudo kubectl port-forward svc/echo 8080:80 &
+PORT_FORWARD_PID=$!
 sleep 1
 
 echo "Querying echo service at localhost:8080 to see which pod handles the request..."
