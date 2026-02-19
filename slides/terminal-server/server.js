@@ -108,7 +108,6 @@ function startServer() {
       sessionTimeoutMs: SESSION_TIMEOUT_MS
     });
     log('info', 'WebSocket ready for xterm.js connections');
-    log('info', 'Security: Only accepting connections from localhost');
     setupWebSocket(server);
   });
 
@@ -141,13 +140,6 @@ function setupWebSocket(server) {
   wss.on('connection', (ws, req) => {
     const clientIp = extractClientIp(req);
     const connectionId = ++connectionCounter;
-    
-    // Only accept localhost connections
-    if (clientIp !== '127.0.0.1' && clientIp !== '::1' && clientIp !== '::ffff:127.0.0.1') {
-      log('warn', 'Rejected websocket connection', { clientIp, connectionId });
-      ws.close(1008, 'Only localhost connections allowed');
-      return;
-    }
 
     log('info', 'WebSocket connected', { clientIp, connectionId });
 
