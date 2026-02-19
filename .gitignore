@@ -73,3 +73,4 @@ chat-backend/out/
 echo-demo/manifests/*.bak
 echo-demo/scripts/*.bak
 .tailscale-key
+.unused-images-*

@@ -58,6 +58,7 @@ function getAvailabilityCache() {
 
 const props = defineProps<{
   scriptPath: string
+  terminalHost?: string
 }>()
 
 const isTerminalAvailable = ref(false)
@@ -86,8 +87,13 @@ async function checkTerminalAvailability() {
     const controller = new AbortController()
     const timeout = window.setTimeout(() => controller.abort(), 500)
 
+    // Use environment variable or default to localhost
+    const wsUrl = import.meta.env.VITE_TERMINAL_WS_URL || 'ws://127.0.0.1:3031'
+    const httpUrl = wsUrl.replace('ws://', 'http://').replace('ws:', 'http:')
+    const healthUrl = `${httpUrl}/health`
+
     try {
-      const response = await fetch('http://127.0.0.1:3031/health', {
+      const response = await fetch(healthUrl, {
         method: 'GET',
         signal: controller.signal
       })
@@ -118,20 +124,26 @@ function handleRunClick() {
   if (!canRun.value) {
     return
   }
-  console.info('[code-with-script] run clicked', { scriptPath: props.scriptPath })
-  const openTerminal = (window as Window & { openTerminal?: (scriptPath: string) => void })
+  console.info('[code-with-script] run clicked', { 
+    scriptPath: props.scriptPath,
+    terminalHost: props.terminalHost 
+  })
+  const openTerminal = (window as Window & { openTerminal?: (scriptPath: string, terminalHost?: string) => void })
     .openTerminal
 
   if (typeof openTerminal === 'function') {
     console.info('[code-with-script] using window.openTerminal')
-    openTerminal(props.scriptPath)
+    openTerminal(props.scriptPath, props.terminalHost)
     return
   }
 
   console.warn('[code-with-script] window.openTerminal missing; dispatching terminal:run event')
   window.dispatchEvent(
     new CustomEvent('terminal:run', {
-      detail: { scriptPath: props.scriptPath }
+      detail: { 
+        scriptPath: props.scriptPath,
+        terminalHost: props.terminalHost
+      }
     })
   )
 }

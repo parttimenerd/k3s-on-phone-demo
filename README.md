@@ -2,9 +2,9 @@
 
 [![Slidev Build](https://github.com/parttimenerd/k3s-on-phone-demo/actions/workflows/slidev-build.yml/badge.svg)](https://github.com/parttimenerd/k3s-on-phone-demo/actions/workflows/slidev-build.yml)
 
-> Running a multi-node Kubernetes cluster on Android phones — with a distributed chat app and an on-device LLM.
+> Running a multi-node Kubernetes cluster on Android phones for educational purposes.
 
-Modern smartphones are more powerful than early cloud servers. This project demonstrates running **k3s** (lightweight Kubernetes) on Android phones for educational purposes.
+Modern smartphones are more powerful than early cloud servers. This project demonstrates running **k3s** (lightweight Kubernetes) on Android phones.
 
 ## Quick Start
 
@@ -36,7 +36,7 @@ The presentation includes an **interactive terminal** for running demo scripts d
 - See live command output in the presentation
 
 **⚠️ Security Notice:**
-- **Localhost only** - Terminal server binds to 127.0.0.1
+- **Network access** - Terminal server can bind to all interfaces for remote access
 - **No encryption** - WebSocket traffic is unencrypted
 - **Not for production** - Educational/demo purposes only
 - Scripts are whitelisted to `echo-demo/`, `chat-demo/`, and `demo/` directories
@@ -51,7 +51,7 @@ The launcher will automatically install dependencies and start both the terminal
 
 **Demo Scripts:**
 - `echo-demo/` — Simple echo server deployment
-- `chat-demo/` — Distributed chat with LLM integration
+- `chat-demo/` — Distributed chat application
 
 ## Table of Contents
 
@@ -61,11 +61,6 @@ The launcher will automatically install dependencies and start both the terminal
   - [Table of Contents](#table-of-contents)
   - [Architecture](#architecture)
   - [Setup](#setup)
-  - [Demo: LLM Integration](#demo-llm-integration)
-  - [Setup](#setup-1)
-  - [Usage](#usage)
-  - [Models Available](#models-available)
-  - [API Details](#api-details)
 - [Kubernetes Concepts Used](#kubernetes-concepts-used)
 - [Additional Useful References](#additional-useful-references)
 - [Final Thought](#final-thought)
@@ -107,63 +102,6 @@ curl -fsSL https://tailscale.com/install.sh | sh
 sudo tailscale up
 ```
 
-## Demo: LLM Integration
-
-Uses [local-android-ai](https://github.com/parttimenerd/local-android-ai) for on-device inference.
-
-1. Install APK on a phone
-2. Download model (Gemma 3.1B recommended)
-3. Label the node: `kubectl label node <phone> llm=true`
-4. Deploy chat app from `chat-demo/`
-
-The chat app can call the LLM via `/llm` commands.
-
-The LLM runs only on Phone B (native Android app).
-
-## Setup
-
-1. Download APK from [GitHub Releases](https://github.com/parttimenerd/local-android-ai/releases)
-2. Install on phone-b
-   llm=curl -s -d '{"text":"${ARG}","model":"GEMMA_3_1B_IT"}' http://localhost:8005/ai/text | jq -r '.response'
-   ```
-7. Label node:
-   ```bash
-   kubectl label node phone-b llm=true
-   ```
-
-## Usage
-
-In the chat interface:
-
-```
-/llm Write a poem about containers
-```
-
-LLM generates response on phone-b (2-5 seconds), returned through chat.
-
-## Models Available
-
-- **Gemma 3.1B** (fast, recommended for demos)
-- **Qwen 2.5 1.5B** (faster, but less capable)
-- **EfficientDet Lite 2** (object detection via camera)
-
-## API Details
-
-- **Port:** 8005
-- **Endpoints:**
-  - `/ai/text` — Text generation
-  - `/camera/detect` — Object detection
-  - `/orientation` — Phone orientation data
-
-**Reference:** [Blog Post: Running LLM on Android Phone](https://mostlynerdless.de/blog/2025/11/05/running-an-llm-on-an-android-phone/)
-
-**Alternative Options:**
-
-If you prefer a different LLM stack:
-
-- [llama.cpp](https://github.com/ggerganov/llama.cpp) (C/C++ implementation)
-- [MLC LLM](https://mlc.ai/) (Android support)
-
 ---
 
 # Kubernetes Concepts Used
@@ -195,7 +133,6 @@ k3s
 Running Kubernetes on Phones:
 
 * [https://hackaday.com/2025/04/20/old-phones-become-a-kubernetes-cluster/](https://hackaday.com/2025/04/20/old-phones-become-a-kubernetes-cluster/)
-* [https://mostlynerdless.de/blog/2025/11/05/running-an-llm-on-an-android-phone/](https://mostlynerdless.de/blog/2025/11/05/running-an-llm-on-an-android-phone/)
 
 Raspberry Pi Clusters:
 

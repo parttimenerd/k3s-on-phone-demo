@@ -6,6 +6,17 @@
           <div class="modal-header">
             <h3>Terminal</h3>
             <div class="modal-actions">
+              <select
+                v-if="availableHosts.length > 1"
+                v-model="selectedHost"
+                @change="onHostChange"
+                class="host-selector"
+                title="Select terminal server"
+              >
+                <option v-for="host in availableHosts" :key="host" :value="host">
+                  {{ host }}
+                </option>
+              </select>
               <span v-if="!isConnected" class="status-badge error">Disconnected</span>
 
               <button @click="close" class="close-btn" title="Close (Ctrl+Esc)">×</button>
@@ -24,7 +35,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import { WebLinksAddon } from '@xterm/addon-web-links'
@@ -33,24 +44,75 @@ import '@xterm/xterm/css/xterm.css'
 
 const emit = defineEmits(['close'])
 
+const props = defineProps({
+  preferredHost: {
+    type: String,
+    default: null
+  }
+})
+
 const isOpen = ref(false)
 const isConnected = ref(false)
 const terminalRef = ref(null)
 const overlayStyle = ref({})
+const selectedHost = ref(null)
+
+// Parse available hosts from environment
+const availableHosts = computed(() => {
+  const hostsStr = import.meta.env.VITE_TERMINAL_HOSTS
+  if (!hostsStr) return ['127.0.0.1']
+  return hostsStr.split(',').map(h => h.trim()).filter(Boolean)
+})
+
+// Get current WebSocket URL based on selected host
+const currentWsUrl = computed(() => {
+  const host = selectedHost.value || availableHosts.value[0]
+  return `ws://${host}:3031`
+})
 
 let terminal = null
 let fitAddon = null
 let webLinksAddon = null
 let searchAddon = null
-let ws = null
+let wsConnections = new Map() // Map of host -> WebSocket
+let ws = null // Current active WebSocket
 let pendingScript = null
 let lastSearchTerm = ''
 let fontSize = 20
 const MIN_FONT_SIZE = 10
 const MAX_FONT_SIZE = 40
 const FONT_SIZE_STORAGE_KEY = 'slidev-terminal-font-size'
+const SELECTED_HOST_STORAGE_KEY = 'slidev-terminal-selected-host'
 
-const WS_URL = 'ws://127.0.0.1:3031'
+function onHostChange() {
+  // Save selection
+  localStorage.setItem(SELECTED_HOST_STORAGE_KEY, selectedHost.value)
+  
+  // Switch to existing connection or create new one
+  const host = selectedHost.value
+  if (wsConnections.has(host)) {
+    // Switch to existing connection
+    const existingWs = wsConnections.get(host)
+    if (existingWs.readyState === WebSocket.OPEN) {
+      console.info('[terminal] switching to existing connection', { host })
+      ws = existingWs
+      isConnected.value = true
+      
+      // Clear terminal and request current state
+      terminal?.clear()
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'refresh' }))
+      }
+      return
+    } else {
+      // Connection died, remove it
+      wsConnections.delete(host)
+    }
+  }
+  
+  // Create new connection
+  connectWebSocket()
+}
 
 function createTerminal() {
   terminal = new Terminal({
@@ -280,21 +342,30 @@ function updateOverlayBounds() {
 }
 
 function connectWebSocket() {
-  ws = new WebSocket(WS_URL)
+  const wsUrl = currentWsUrl.value
+  const host = selectedHost.value
+  console.log('[terminal] connecting to:', wsUrl, { host })
+  
+  const newWs = new WebSocket(wsUrl)
 
-  ws.onopen = () => {
-    console.log('WebSocket connected')
+  newWs.onopen = () => {
+    console.log('[terminal] WebSocket connected to', wsUrl)
+    ws = newWs
+    wsConnections.set(host, newWs)
     isConnected.value = true
 
     // Start terminal session
-    ws.send(JSON.stringify({
+    newWs.send(JSON.stringify({
       type: 'start',
       cols: terminal.cols,
       rows: terminal.rows
     }))
   }
 
-  ws.onmessage = (event) => {
+  newWs.onmessage = (event) => {
+    // Only process messages from the currently active connection
+    if (newWs !== ws) return
+    
     const message = JSON.parse(event.data)
 
     if (message.type === 'data') {
@@ -314,15 +385,23 @@ function connectWebSocket() {
     }
   }
 
-  ws.onerror = (error) => {
+  newWs.onerror = (error) => {
     console.error('WebSocket error:', error)
-    terminal.write('\r\n\x1b[31mConnection error\x1b[0m\r\n')
+    // Only show error if this is the active connection
+    if (newWs === ws) {
+      terminal.write('\r\n\x1b[31mConnection error\x1b[0m\r\n')
+    }
   }
 
-  ws.onclose = () => {
-    console.log('WebSocket closed')
-    isConnected.value = false
-    terminal.write('\r\n\x1b[33mDisconnected from server\x1b[0m\r\n')
+  newWs.onclose = () => {
+    console.log('WebSocket closed for', host)
+    wsConnections.delete(host)
+    
+    // Only update UI if this was the active connection
+    if (newWs === ws) {
+      isConnected.value = false
+      terminal.write('\r\n\x1b[33mDisconnected from server\x1b[0m\r\n')
+    }
   }
 
   // Forward terminal input to server
@@ -348,8 +427,25 @@ function executeScript(scriptPath) {
   }
 }
 
-function open(scriptPath = null) {
-  console.info('[terminal] open requested', { scriptPath })
+function open(scriptPath = null, hostPreference = null) {
+  console.info('[terminal] open requested', { scriptPath, hostPreference })
+  
+  // Set host preference if provided
+  if (hostPreference && availableHosts.value.includes(hostPreference)) {
+    selectedHost.value = hostPreference
+    localStorage.setItem(SELECTED_HOST_STORAGE_KEY, hostPreference)
+  } else if (!selectedHost.value) {
+    // Initialize selected host from storage or use first available
+    const stored = localStorage.getItem(SELECTED_HOST_STORAGE_KEY)
+    if (stored && availableHosts.value.includes(stored)) {
+      selectedHost.value = stored
+    } else if (props.preferredHost && availableHosts.value.includes(props.preferredHost)) {
+      selectedHost.value = props.preferredHost
+    } else {
+      selectedHost.value = availableHosts.value[0]
+    }
+  }
+  
   updateOverlayBounds()
   isOpen.value = true
   if (typeof window !== 'undefined') {
@@ -446,7 +542,7 @@ function handleRunEvent(event) {
   const detail = event?.detail || {}
   console.info('[terminal] run event received', detail)
   if (detail.scriptPath) {
-    open(detail.scriptPath)
+    open(detail.scriptPath, detail.terminalHost)
   } else {
     open()
   }
@@ -468,9 +564,9 @@ onMounted(() => {
   window.__terminalIsOpen = false
   window.addEventListener('keydown', handleKeydown)
   window.addEventListener('terminal:run', handleRunEvent)
-  window.openTerminal = (scriptPath = null) => {
-    console.info('[terminal] window.openTerminal invoked', { scriptPath })
-    open(scriptPath)
+  window.openTerminal = (scriptPath = null, terminalHost = null) => {
+    console.info('[terminal] window.openTerminal invoked', { scriptPath, terminalHost })
+    open(scriptPath, terminalHost)
   }
 })
 
@@ -482,9 +578,13 @@ onUnmounted(() => {
   }
   window.removeEventListener('resize', handleResize)
   
-  if (ws) {
-    ws.close()
+  // Close all WebSocket connections
+  for (const [host, connection] of wsConnections.entries()) {
+    console.log('[terminal] closing connection to', host)
+    connection.close()
   }
+  wsConnections.clear()
+  ws = null
   
   if (terminal) {
     terminal.dispose()
@@ -545,6 +645,28 @@ defineExpose({
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.host-selector {
+  background: #333;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.host-selector:hover {
+  background: #444;
+  border-color: #666;
+}
+
+.host-selector:focus {
+  outline: none;
+  border-color: #0dbc79;
 }
 
 .status-badge {
