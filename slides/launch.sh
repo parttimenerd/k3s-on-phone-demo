@@ -14,31 +14,38 @@ NC='\033[0m' # No Color
 LAUNCH_TERMINAL=false
 OPEN_BROWSER=false
 TERMINAL_PID=""
+TERMINAL_HOST=""
 
 # Usage function
 usage() {
   echo -e "${BLUE}Usage:${NC} $0 [OPTIONS]"
   echo ""
   echo -e "${BLUE}Options:${NC}"
-  echo -e "  ${GREEN}--terminal${NC}    Enable interactive terminal server for running scripts from slides"
-  echo -e "  ${GREEN}--open${NC}        Open browser automatically"
-  echo -e "  ${GREEN}--help, -h${NC}    Show this help message"
+  echo -e "  ${GREEN}--terminal${NC}              Enable interactive terminal server for running scripts from slides"
+  echo -e "  ${GREEN}--terminal-host HOST${NC}   Connect to remote terminal server at HOST (e.g., phone-a)"
+  echo -e "  ${GREEN}--open${NC}                  Open browser automatically"
+  echo -e "  ${GREEN}--help, -h${NC}              Show this help message"
   echo ""
   echo -e "${BLUE}Examples:${NC}"
-  echo -e "  $0                  # Launch presentation only"
-  echo -e "  $0 --open           # Launch and open browser"
-  echo -e "  $0 --terminal       # Launch with terminal server (press 't' to open terminal)"
-  echo -e "  $0 --terminal --open # Launch with terminal and open browser"
+  echo -e "  $0                           # Launch presentation only"
+  echo -e "  $0 --open                    # Launch and open browser"
+  echo -e "  $0 --terminal                # Launch with local terminal server"
+  echo -e "  $0 --terminal-host phone-a   # Connect to terminal server on phone-a"
+  echo -e "  $0 --terminal --open         # Launch with terminal and open browser"
   echo ""
   exit 0
 }
 
 # Parse arguments
-for arg in "$@"; do
-  case $arg in
+while [[ $# -gt 0 ]]; do
+  case $1 in
     --terminal)
       LAUNCH_TERMINAL=true
       shift
+      ;;
+    --terminal-host)
+      TERMINAL_HOST="$2"
+      shift 2
       ;;
     --open)
       OPEN_BROWSER=true
@@ -48,7 +55,7 @@ for arg in "$@"; do
       usage
       ;;
     *)
-      echo -e "${YELLOW}Unknown option: $arg${NC}"
+      echo -e "${YELLOW}Unknown option: $1${NC}"
       echo ""
       usage
       ;;
@@ -80,7 +87,7 @@ fi
 
 # Launch terminal server if requested
 if [ "$LAUNCH_TERMINAL" = true ]; then
-  echo -e "${GREEN}🚀 Launching with terminal server${NC}"
+  echo -e "${GREEN}🚀 Launching with local terminal server${NC}"
   echo ""
   
   # Check and install terminal server dependencies
@@ -115,9 +122,18 @@ if [ "$LAUNCH_TERMINAL" = true ]; then
     TERMINAL_PID=""
     echo ""
   fi
+elif [ -n "$TERMINAL_HOST" ]; then
+  echo -e "${GREEN}🌐 Connecting to remote terminal server${NC}"
+  echo -e "${BLUE}Terminal server: http://${TERMINAL_HOST}:3031${NC}"
+  echo ""
+  echo -e "${GREEN}Terminal features enabled:${NC}"
+  echo -e "  • Press ${YELLOW}'t'${NC} to open terminal"
+  echo -e "  • Click ${YELLOW}'Run'${NC} buttons to execute scripts"
+  echo -e "  • ${YELLOW}Note:${NC} Terminal server must be running on ${TERMINAL_HOST}"
+  echo ""
 else
   echo -e "${BLUE}Launching presentation (without terminal)${NC}"
-  echo -e "${YELLOW}Tip: Use ${NC}./launch.sh --terminal${YELLOW} to enable terminal features${NC}"
+  echo -e "${YELLOW}Tip: Use ${NC}./launch.sh --terminal${YELLOW} or ${NC}--terminal-host HOST${YELLOW} to enable terminal features${NC}"
   echo ""
 fi
 
@@ -130,5 +146,5 @@ echo ""
 if [ "$OPEN_BROWSER" = true ]; then
   npm run dev
 else
-  DANGEROUSLY_DISABLE_HOST_CHECK=true npx slidev --port 3032
+  npx slidev --port 3032
 fi

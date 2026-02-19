@@ -6,7 +6,7 @@ const fs = require('fs');
 const { spawn } = require('child_process');
 
 let PORT = 3031;
-const HOST = '127.0.0.1'; // Localhost only for security
+const HOST = process.env.TERMINAL_SERVER_HOST || '0.0.0.0'; // Bind to all interfaces by default
 const SESSION_TIMEOUT_MS = 10 * 60 * 1000;
 const LOG_LEVEL = (process.env.TERMINAL_SERVER_LOG_LEVEL || 'info').toLowerCase();
 const LOG_FORMAT = (process.env.TERMINAL_SERVER_LOG_FORMAT || 'text').toLowerCase();
@@ -78,10 +78,12 @@ function startServer() {
       });
     });
 
-    // Set CORS headers for localhost only
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3032');
+    // Set CORS headers
+    const origin = req.headers.origin || '*';
+    res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
 
     if (req.method === 'OPTIONS') {
       res.writeHead(204);
