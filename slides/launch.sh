@@ -130,5 +130,5 @@ echo ""
 if [ "$OPEN_BROWSER" = true ]; then
   npm run dev
 else
-  npx slidev --port 3032
+  DANGEROUSLY_DISABLE_HOST_CHECK=true npx slidev --port 3032
 fi
