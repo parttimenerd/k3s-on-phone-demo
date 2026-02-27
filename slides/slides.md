@@ -214,6 +214,9 @@ layout: section
 
 # But first, who am I?
 
+Johannes Bechberger<br/>
+mostlynerdless.de
+
 ---
 layout: image
 image: ./img/playfull_sapmachine.png
